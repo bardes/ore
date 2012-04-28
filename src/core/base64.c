@@ -1,7 +1,5 @@
 #include "base64.hpp"
 
-#include <vector>
-
 int base64decode(const char *encodedString, unsigned char *decodedData,
                  size_t maxDecodedLen)
 {
@@ -12,17 +10,17 @@ int base64decode(const char *encodedString, unsigned char *decodedData,
                            'a','b','c','d','e','f','g','h','i','j','k','l','m',
                            'n','o','p','q','r','s','t','u','v','w','x','y','z',
                            '0','1','2','3','4','5','6','7','8','9','+','/'};
-    std::vector<char> decoded;
     
-    //measuring the string
+    //Measuring the string (Does NOT include the paddings)
     int len = 0;
     while(encodedString[len] != '\0' && encodedString[len] != '=')
         ++len;
     
+    //Is it valid
     if(len < 2)
             return 0;
     
-    //this block gets the 6-bit integer value of the base64 string
+    //This block gets the 6-bit integer value of the base64 string
     unsigned char values[len];
     for (unsigned int i = 0; i < len; i++)
     {
@@ -35,24 +33,29 @@ int base64decode(const char *encodedString, unsigned char *decodedData,
         values[i] = j;
     }
     
-    //now converting it to 8bit integers (and using a vector to store them)
-    for (unsigned int i = 0; i < len; i += 4)
+    //Calculating the decoded lenght
+    int decodedLen;
+    switch(len % 4)
     {
-        if(i + 1 < len)
-            decoded.push_back(((values[i] << 6) | values[i + 1]) >> 4);
-        if(i + 2 < len)
-            decoded.push_back(((values[i + 1] % 16) << 4) | values[i + 2] >> 2);
-        if(i + 3 < len)
-            decoded.push_back(((values[i + 2] % 4) << 6) | values[i + 3]);
+        case 0: decodedLen = (len / 4) * 3; break; //No padding
+        case 2: decodedLen = ((len / 4) * 3) + 1; break; //Two paddings (==)
+        case 3: decodedLen = ((len / 4) * 3) + 2; break; //One padding  (=)
+        default: return 0; break; //Should not happen in normal conditions
     }
 
     //Will it fit?
-    if(decoded.size() > maxDecodedLen)
+    if(decodedLen > maxDecodedLen)
         return 0;
-
-    //Copying the values
-    for (int i = 0; i < decoded.size(); ++i)
-        decodedData[i] = decoded[i];
-
-    return decoded.size();
+    
+    //Now converting it to 8bit integers (and using a vector to store them)
+    for (unsigned int i = 0; i < len; i += 4)
+    {
+        if(i + 1 < len)
+            decodedData[(i/4) * 3] = (values[i] << 2) | (values[i+1] >> 4);
+        if(i + 2 < len)
+            decodedData[((i / 4) * 3)+1] = (values[i+1] << 4) | (values[i+2] >>2);
+        if(i + 3 < len)
+            decodedData[((i / 4) * 3)+2] = (values[i+2] << 6) | values[i+3];
+    }
+    return decodedLen;
 }
