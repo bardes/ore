@@ -31,8 +31,15 @@ Created in: May, 2011
 License: CC-BY 3.0 (http://creativecommons.org/licenses/by/3.0/)
 
 --------------------------------What it does?-----------------------------------
-That's is a good question...
+ORE is supposed to be a library, that helps the creation of RPG games by
+providing some of the most common stuff like: maps, characters, NPCs, etc... The
+idea is to make things easier for the programmer (in the engine side at least)
+so he/she may spend more time developing the game than solving engine problems
+or bugs.
 
+
+So, what exactly it does?
+(TODO)
 -------------------------------File Ftructure-----------------------------------
 All files come inside a directory most times called ORE-x.y inside are all files
 necessary to compile and use ORE.
