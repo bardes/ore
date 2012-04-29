@@ -1,0 +1,12 @@
+#Backup files
+*.backup
+*.*~
+~*
+*.save
+*.bak
+
+#IDE files
+*.kdev4
+*.cbp
+*.pro
+*.user
