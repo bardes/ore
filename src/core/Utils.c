@@ -1,3 +1,5 @@
+extern C;
+
 int base64decode(const char *encodedString, unsigned char *decodedData,
                  unsigned int maxDecodedLen)
 {
