@@ -1,7 +1,5 @@
-#include "base64.hpp"
-
 int base64decode(const char *encodedString, unsigned char *decodedData,
-                 size_t maxDecodedLen)
+                 unsigned int maxDecodedLen)
 {
     //this array teels the integer value of a character based in it's position
     //eg: A=0 B=1 C=3 ....
@@ -22,7 +20,8 @@ int base64decode(const char *encodedString, unsigned char *decodedData,
     
     //This block gets the 6-bit integer value of the base64 string
     unsigned char values[len];
-    for (unsigned int i = 0; i < len; i++)
+    unsigned int i; //General iterator
+    for (i = 0; i < len; i++)
     {
         unsigned char j = 0;
         for (; encodedString[i] != characters[j]; j++)
@@ -48,7 +47,7 @@ int base64decode(const char *encodedString, unsigned char *decodedData,
         return 0;
     
     //Now converting it to 8bit integers (and using a vector to store them)
-    for (unsigned int i = 0; i < len; i += 4)
+    for (i = 0; i < len; i += 4)
     {
         if(i + 1 < len)
             decodedData[(i/4) * 3] = (values[i] << 2) | (values[i+1] >> 4);
