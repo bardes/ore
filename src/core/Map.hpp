@@ -4,9 +4,15 @@
 #include <list>
 #include <string>
 #include <map>
+#include <sys/types.h>
+#include <vector>
 
 namespace ore
 {
+    //Constants
+    const unsigned int Max_Layes = 8;
+
+    //Enums
     enum MAP_ERRORS {
         ERR_FILE_READ_ERROR = 1,
         ERR_INVALID_MAP_DATA,
@@ -15,7 +21,8 @@ namespace ore
         ERR_INVALID_COMPRESSION_METHOD,
         ERR_INVALID_TILESET
     };
-    
+
+    //Classes
     class Map
     {
     public:
@@ -26,17 +33,15 @@ namespace ore
         int GetWidth() const;
         int GetTileWidth() const;
         int GetTileHeight() const;
-        int AddTileset(const char *tilesetPath);
         
     private:
         std::string mFilePath;
-        int mHeight;
-        int mWidth;
-        int mTileWidth;
-        int mTileHeight;
-        unsigned char mTilesetCnt;
-        
-        int *mTiles;
+        uint mHeight;
+        uint mWidth;
+        uint mTileWidth;
+        uint mTileHeight;
+        std::vector<std::string> mTileSetsPath;
+        uint *mLayers[Max_Layes];
     };
 }
 #endif // MAP_HPP

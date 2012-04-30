@@ -1,11 +1,16 @@
-#ifndef BASE64_H
-#define BASE64_H
+#ifndef BASE64_HPP
+#define BASE64_HPP
+
+#include <string>
+#include <vector>
+
+typedef unsigned char Byte;
 
 /**
- * This function takes an encoded string and decodes it into a byte array.
- * Return value: Size of the decoded array.
+ * This function takes an encoded string and decodes it into a unsigned char
+ * vector. decodedData will be an empty vector on failure.
  **/
-int base64decode(const char *encodedString, unsigned char *decodedData,
-                 size_t maxDecodedLen);
+void base64decode(const std::string& encodedString,
+                  std::vector<Byte> &decodedData);
 
-#endif // BASE64_H
+#endif // BASE64_HPP

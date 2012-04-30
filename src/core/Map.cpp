@@ -1,29 +1,33 @@
 #include "Map.hpp"
 
-#include "Utils.h"
+#include "Utils.hpp"
 
-#include "../tinyxml2/tinyxml2.h"
+#include "../tinyXml/tinyxml.h"
 
 #include <cstring>
+#include <iostream>
+#include <string>
+#include <sys/types.h>
 #include <zlib.h>
 
-using namespace ore;
-Map::Map() : mFilePath(""), mHeight(0), mWidth(0), mTileWidth(0),
-mTileHeight(0), mTiles(NULL)
+ore::Map::Map() : mFilePath(""), mHeight(0), mWidth(0), mTileWidth(0),
+mTileHeight(0)
 {
-    //Nothing to do here. (yet?)
+    for(uint i = 0; i < Max_Layes; ++i)
+        mLayers[i] = NULL;
 }
 
-Map::~Map()
+ore::Map::~Map()
 {
-    delete [] mTiles;
+    for(uint i = 0; i < Max_Layes; ++i)
+        delete mLayers[i];
 }
 
-int Map::Load(const char *file)
+int ore::Map::Load(const char *file)
 {
 
     //The .tmx map file
-    tinyxml2::XMLDocument xmlFile;
+    TiXmlDocument xmlFile;
     
     //Checking if the file opened without problems
     if (!xmlFile.LoadFile(file))
@@ -32,115 +36,127 @@ int Map::Load(const char *file)
     }
     
     //Reading some basic info about this map
-    xmlFile.RootElement()->Attribute("width", &mWidth);
-    xmlFile.RootElement()->Attribute("height", &mHeight);
-    xmlFile.RootElement()->Attribute("tilewidth", &mTileWidth);
-    xmlFile.RootElement()->Attribute("tileheight", &mTileHeight);
+    int Width, Height, TileHeight, TileWidth;
+    Width = Height = TileHeight = TileWidth = 0;
+    xmlFile.RootElement()->Attribute("width", &Width);
+    xmlFile.RootElement()->Attribute("height", &Height);
+    xmlFile.RootElement()->Attribute("tilewidth", &TileWidth);
+    xmlFile.RootElement()->Attribute("tileheight", &TileHeight);
+
+    mWidth = Width;
+    mHeight = Height;
+    mTileWidth = TileWidth;
+    mTileHeight = TileHeight;
     
     //Checking if all info is valid
     if (!(mWidth && mHeight && mTileHeight && mTileWidth))
         return ERR_INVALID_MAP_DATA;
     
     //Used to iterate through some nodes later
-    tinyxml2::XMLNode *node;
+    TiXmlNode *node;
         
     //Generic counter used for different things during the lading process
     int count = 0;
-        
     //Loading the tileset
-    if(node = xmlFile.RootElement()->FirstChild("tileset") == NULL)
+    if((node = xmlFile.RootElement()->FirstChildElement("tileset")) == NULL)
         return ERR_INVALID_TILESET;
 
-    for(mTilesetCnt = 0; mTilesetCnt < 256, ++mTilesetCnt)
+    //TODO hardcoding, not good... Use data from a config file later.
+    std::string defaultTilesetDir = "../data/maps/";
+    mTileSetsPath.clear();//In case of reloaing a map
+    for(; node; node = node->NextSiblingElement("tileset"))
     {
-        
-    }
-    std::string tilesetPath = "../data/maps/";//TODO hardcoding, not good... Use data from a config file later.
-    tilesetPath.append(node->FirstChildElement("image")->Attribute("source"));
-    
-    //Iterating through the tilesets, to be sure that there is only one tileset
-    for (; node; node = node->NextSibling("tileset"))
-        ++count;
-                
-    //Searching for the Ground layer
-    node = xmlFile.RootElement()->FirstChild("layer");
-    for (; node; node = node->NextSibling("tileset"))
-    {
-        if (strcmp(node->ToElement()->Attribute("name"), "Ground"))
-            continue;
-        break;
+        mTileSetsPath.push_back(defaultTilesetDir +
+                   node->FirstChildElement("image")->Attribute("source"));
     }
 
-    //Checking if there is data to read
-    TiXmlString encoded("");
-    encoded = node->FirstChild()->FirstChild()->Value();
-    if (encoded.length() == 0)
+    //TODO Do the SDL part of loading tile images and so on
+
+    //Searching for the first layer
+    if((node = xmlFile.RootElement()->FirstChildElement("layer")) == NULL)
         return ERR_INVALID_MAP_DATA;
 
-    //Must be using zlib compression
-    if (!node->FirstChildElement()->Attribute("compression"))
-    return ERR_INVALID_COMPRESSION_METHOD;
-    else if(strcmp(node->FirstChildElement()->Attribute("compression"), "zlib"))
-    return ERR_INVALID_COMPRESSION_METHOD;
-
-
-    //Rough approximation of the decoded size
-    int maxSize = int(encoded.length() * .75) + 2;
-
-    //Will store the decoded data
-    unsigned char decoded[maxSize];
-
-    //Decodes the data and returns its actual length
-    int decodedLen = base64decode(encoded.c_str(), decoded, maxSize);
-
-    //Now it's time to uncompress the it. The expected size of the uncompressed
-    //data is 4 times the number of tiles in the map. 4 bytes (one int) per tile
-    uLongf expectedSize = 4 * mHeight * mWidth;
-    unsigned char uncompressed[expectedSize];
-    int err;
-    if((err = uncompress(uncompressed, &expectedSize, decoded, decodedLen)) < 0)
+    for (uint i = 0; node && i < Max_Layes; ++i)
     {
-        std::cerr << "zlib error code: " << err << std::endl;
-        return ERR_ZLIB_ERROR; //Checking for errors during the uncompression
+        //Must be using zlib compression
+        if (!node->FirstChildElement("data")->Attribute("compression"))
+            return ERR_INVALID_COMPRESSION_METHOD;
+        else if(strcmp(node->FirstChildElement("data")->
+                       Attribute("compression"), "zlib"))
+            return ERR_INVALID_COMPRESSION_METHOD;
+
+        //Decoding the base64 string
+        std::string data = node->FirstChildElement("data")->GetText();
+        std::vector<Byte> decoded;
+        base64decode(data, decoded);
+
+        if(decoded.empty())
+            return ERR_INVALID_MAP_DATA;
+
+        //Now it's time to uncompress it. The expected size of the uncompressed
+        //data is 4 times the number of tiles in the map. 4 bytes (one int) per tile
+        ulong expectedSize = 4 * mHeight * mWidth;
+        Byte uncompressed[expectedSize];
+        int err;
+        if((err = uncompress(uncompressed, &expectedSize, decoded.data(),
+            decoded.size())) < 0)
+        {
+            std::cerr << "zlib error code: " << err << std::endl;
+            return ERR_ZLIB_ERROR;
+        }
+
+        //If the size is no longer the same, something is wrong with the data
+        if(expectedSize != 4 * mHeight * mWidth)
+            return ERR_INVALID_TILE_DATA;
+
+        //Converting (to int) and copying the layers data to the mLayers array
+        mLayers[i] = new uint[mHeight * mWidth];
+        for(int k = 0; k < expectedSize; k += 4)
+        {
+            mLayers[i][k / 4] = uncompressed[k] | (uncompressed[k + 1] << 8) |
+            (uncompressed[k + 2] << 16) | uncompressed[k + 3] << 24;
+            --mLayers[i][k /4]; // The tile count starts from 0, not 1
+        }
+        
+        //Go to the next layer in the file
+        node = node->NextSiblingElement("layer");
     }
 
-    //If the size is no longer the same, something is wrong with the tile data
-    if(expectedSize != 4 * mHeight * mWidth)
-        return ERR_INVALID_TILE_DATA;
-
-    //Converting (to int) and copying the tile data to the mTiles array
-    mTiles = new int[mHeight * mWidth];
-    for(int i = 0; i < expectedSize; i += 4)
-    {
-        mTiles[i / 4] = uncompressed[i] | (uncompressed[i + 1] << 8) |
-        (uncompressed[i + 2] << 16) | uncompressed[i + 3] << 24;
-        --mTiles[i /4]; // The tile count starts from 0, not 1
-    }
+//      //Debug
+//     for(int i = 0; i < Max_Layes; ++i)
+//     {
+//         if(mLayers[i])
+//         {
+//             std::cout << "Layer " << i << ":\n";
+//             for(int j = 0; j < mHeight * mWidth; ++j)
+//             {
+//                 std::cout << j << "\t - " << mLayers[i][j] << '\n';
+//             }
+//         }
+//         else
+//         {
+//             std::cout << "Layer " << i << ": NULL\n";
+//         }
+//     }
     return 0;
 }
 
-int Map::AddTileset(const char* tilesetPath)
-{
-    
-}
-
-int Map::GetHeight() const
+int ore::Map::GetHeight() const
 {
     return mHeight;
 }
 
-int Map::GetWidth() const
+int ore::Map::GetWidth() const
 {
     return mWidth;
 }
 
-int Map::GetTileHeight() const
+int ore::Map::GetTileHeight() const
 {
     return mTileHeight;
 }
 
-int Map::GetTileWidth() const
+int ore::Map::GetTileWidth() const
 {
     return mTileWidth;
 }
-
