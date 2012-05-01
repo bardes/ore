@@ -8,19 +8,18 @@
 
 #include <sys/types.h>
 
-ore::Tileset::Tileset() : mFirstGid(-1), mTileHeight(0), mTileWidth(0),
-mSurface(NULL), mPath("")
+ore::Tileset::Tileset() : mFirstGid(0), mSurface(NULL), mPath("")
 {
     //Nothing to do here.
 }
 
 ore::Tileset::~Tileset()
 {
-    SDL_FreeSurface(mSurface);
+    if(mSurface != NULL)
+        SDL_FreeSurface(mSurface);
 }
 
-int ore::Tileset::Load (const std::string &path, int fGid, uint tileWidth,
-                          uint tileHeight)
+int ore::Tileset::Load (const std::string &path, uint fGid)
 {
     //Checking if SDL wasn't initialized yet
     if(!SDL_WasInit(SDL_INIT_VIDEO))
@@ -29,16 +28,14 @@ int ore::Tileset::Load (const std::string &path, int fGid, uint tileWidth,
     //Freeing the current surface, And getting rid of the old data
     SDL_FreeSurface(mSurface);
     mSurface = NULL;
-    mTileHeight = 0;
-    mTileWidth = 0;
-    mFirstGid = -1;
+    mFirstGid = 0;
     mPath.clear();
     
     //Temporary surface to load the image
     SDL_Surface *tmp = NULL;
     
     //Loading
-    if((IMG_Load(path.c_str())) == NULL)
+    if((tmp = IMG_Load(path.c_str())) == NULL)
     {
         std::cerr << "SDL error: " << SDL_GetError();
         return ERR_FILE_READ_ERROR;
@@ -56,8 +53,7 @@ int ore::Tileset::Load (const std::string &path, int fGid, uint tileWidth,
     //Copying the loaded data into the tileset
     mPath = path;
     mFirstGid = fGid;
-    mTileHeight = tileHeight;
-    mTileWidth = tileWidth;
+    return SUCCESS;
 }
 
 int ore::Tileset::Reload()
@@ -65,7 +61,18 @@ int ore::Tileset::Reload()
     if(mPath.empty())
         return ERR_NO_PATH;
     
-    return Load(mPath, mFirstGid, mTileWidth, mTileHeight);
+    return Load(mPath, mFirstGid);
     
 }
 
+const std::string& ore::Tileset::GetPath() const
+{
+    return mPath;
+}
+
+void ore::Tileset::Clear()
+{
+    mFirstGid = 0;
+    mSurface = NULL;
+    mPath.clear();
+}

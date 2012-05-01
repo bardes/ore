@@ -17,6 +17,5 @@ install(DIRECTORY core tinyXml DESTINATION include
 
 install(TARGETS ore ARCHIVE DESTINATION lib)
 
-
-
-
+add_executable(teste core/main.cpp)
+target_link_libraries(teste ore SDL SDL_image z)

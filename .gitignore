@@ -10,3 +10,7 @@
 *.cbp
 *.pro
 *.user
+
+#Build files
+build/
+Build/

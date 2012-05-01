@@ -1,16 +1,17 @@
 #ifndef MAP_HPP
 #define MAP_HPP
 
+#include "Tileset.hpp"
 #include "Utils.hpp"
 
 #include <string>
-//#include <vector>
+#include <list>
 
 #include <sys/types.h>
 
 namespace ore
 {
-    const unsigned int Max_Layes = 8;
+    const unsigned int Max_Layers = 8;
     
     class Map
     {
@@ -70,16 +71,16 @@ namespace ore
         uint mTileHeight;
 
         /**
-         * A vector holding all tilesets of this map.
+         * A list holding all tilesets of this map.
          */
-        //std::vector<> mTilesets;
+        std::list<Tileset> mTilesets;
 
         /**
          * A two dimensional array of uints. The first dimension is the layer
          * the second is the data of the layer. Each tile is represented by a
          * unsigned int.
          */
-        uint *mLayers[Max_Layes];
+        uint *mLayers[Max_Layers];
     };
 }
 #endif // MAP_HPP

@@ -27,8 +27,7 @@ namespace ore
          * @return Returns 0 on success or another [RETURN_VALUE](@ref ore::RETURN_VALUE)
          * in case of failure.
          */
-        int Load(const std::string &path, int fGid, uint tileWidth,
-                  uint tileHeight);
+        int Load(const std::string &path, uint fGid);
 
         /**
          * This function reloads the tileset using mPath as the source image.
@@ -36,23 +35,25 @@ namespace ore
          * NULL, and the data is reset to the defaults.
          */
         int Reload();
+
+        /**
+         * Gets the path of the image.
+         */
+        const std::string& GetPath() const;
+
+        /**
+         * DO NOT USE THIS FUNCTION
+         * This function is a workaround, it may lead to memory leaks if used
+         * incorrectly. It will be removed ASAP.
+         */
+        void Clear();
         
     private:
         /**
          * First id represented by this tile. -1 if not set.
          * (gid = Global ID) 
          */
-        int mFirstGid;
-
-        /**
-         * Height of the tiles.
-         */
-        uint mTileHeight;
-
-        /**
-         * Width of the tiles.
-         */
-        uint mTileWidth;
+        uint mFirstGid;
 
         /**
          * Pointer to the SDL_Surface holding the content of this tileset.

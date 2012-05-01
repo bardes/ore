@@ -7,20 +7,21 @@
 #include <cstring>
 #include <iostream>
 #include <string>
-#include <sys/types.h>
 #include <zlib.h>
+
+#include <sys/types.h>
 
 ore::Map::Map() : mFilePath(""), mHeight(0), mWidth(0), mTileWidth(0),
 mTileHeight(0)
 {
-    for(uint i = 0; i < Max_Layes; ++i)
+    for(uint i = 0; i < Max_Layers; ++i)
         mLayers[i] = NULL;
 }
 
 ore::Map::~Map()
 {
-    for(uint i = 0; i < Max_Layes; ++i)
-        delete mLayers[i];
+    for(uint i = 0; i < Max_Layers; ++i)
+        delete [] mLayers[i];
 }
 
 int ore::Map::Load(const std::string &file)
@@ -52,40 +53,68 @@ int ore::Map::Load(const std::string &file)
     if (!(mWidth && mHeight && mTileHeight && mTileWidth))
         return ERR_INVALID_MAP_DATA;
     
-    //Used to iterate through some nodes later
-    TiXmlNode *node;
+    //Used to iterate through some xml elements later
+    TiXmlElement *element;
         
     //Generic counter used for different things during the lading process
     int count = 0;
+    
     //Loading the tileset
-    if((node = xmlFile.RootElement()->FirstChildElement("tileset")) == NULL)
+    if((element = xmlFile.RootElement()->FirstChildElement("tileset")) == NULL)
         return ERR_INVALID_TILESET;
 
-//     //TODO<Use data from a config file later> (not hard-coding)
-//     std::string defaultTilesetDir = "../data/maps/";
-//     //TODO<Clear tilesets here> //In case of reloading a map
-//     for(; node; node = node->NextSiblingElement("tileset"))
-//     {
-//     //TODO<Load the tilesets>
-//     }
+    //TODO Use data from a config file later (not hard-coding)
+    std::string defaultTilesetDir = "./";
+    mTilesets.clear();//In case of reloading a map
+    for(; element; element = element->NextSiblingElement("tileset"))
+    {
+        //Temporary data
+        Tileset tmp;
+        int firstGid = 0;
+        std::string path;
+        int err;
 
-    //TODO Do the SDL part of loading tile images and so on
+        //Reading the first gid
+        element->Attribute("firstgid", &firstGid);
+        if(firstGid == 0)
+            return ERR_INVALID_TILESET;
+
+        //Getting the path to the image file
+        if(element->FirstChildElement("image"))
+            path = element->FirstChildElement("image")->Attribute("source");
+        else
+            return ERR_INVALID_TILESET;                
+
+        //Loading the tileset
+        if((err = tmp.Load(defaultTilesetDir + path, firstGid)) != SUCCESS)
+            return err;
+
+        //Saving it to the list
+        mTilesets.push_back(tmp);//Something is wrong here...
+
+        //Debug
+        std::cout << tmp.GetPath() << std::endl;
+
+        //!!!TODO!!! FIX THIS ASAP
+        tmp.Clear();
+    }
 
     //Searching for the first layer
-    if((node = xmlFile.RootElement()->FirstChildElement("layer")) == NULL)
+    if((element = xmlFile.RootElement()->FirstChildElement("layer")) == NULL)
         return ERR_INVALID_MAP_DATA;
 
-    for (uint i = 0; node && i < Max_Layes; ++i)
+    for (uint i = 0; element && i < Max_Layers; ++i)
     {
         //Must be using zlib compression
-        if (!node->FirstChildElement("data")->Attribute("compression"))
+        if (!element->FirstChildElement("data")->Attribute("compression"))
             return ERR_INVALID_COMPRESSION_METHOD;
-        else if(strcmp(node->FirstChildElement("data")->
+        else if(strcmp(element->FirstChildElement("data")->
                        Attribute("compression"), "zlib"))
             return ERR_INVALID_COMPRESSION_METHOD;
 
         //Decoding the base64 string
-        std::string data = node->FirstChildElement("data")->GetText();
+        //TODO Check for a NULL string
+        std::string data = element->FirstChildElement("data")->GetText();
         std::vector<Byte> decoded;
         base64decode(data, decoded);
 
@@ -106,7 +135,7 @@ int ore::Map::Load(const std::string &file)
 
         //If the size is no longer the same, something is wrong with the data
         if(expectedSize != 4 * mHeight * mWidth)
-            return ERR_INVALID_TILE_DATA;
+            return ERR_INVALID_MAP_DATA;
 
         //Converting (to int) and copying the layers data to the mLayers array
         mLayers[i] = new uint[mHeight * mWidth];
@@ -117,11 +146,13 @@ int ore::Map::Load(const std::string &file)
         }
         
         //Go to the next layer in the file
-        node = node->NextSiblingElement("layer");
+        element = element->NextSiblingElement("layer");
     }
 
+    //TODO Pre render the layers
+
 //      //Debug
-//     for(int i = 0; i < Max_Layes; ++i)
+//     for(int i = 0; i < Max_Layers; ++i)
 //     {
 //         if(mLayers[i])
 //         {
