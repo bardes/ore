@@ -3,6 +3,8 @@
 #include <string>
 #include <vector>
 
+using namespace ore;
+
 void base64decode(const std::string& encodedString,
                   std::vector<Byte> &decodedData)
 {

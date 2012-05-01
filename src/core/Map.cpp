@@ -23,14 +23,14 @@ ore::Map::~Map()
         delete mLayers[i];
 }
 
-int ore::Map::Load(const char *file)
+int ore::Map::Load(const std::string &file)
 {
 
     //The .tmx map file
     TiXmlDocument xmlFile;
     
     //Checking if the file opened without problems
-    if (!xmlFile.LoadFile(file))
+    if (!xmlFile.LoadFile(file.c_str()))
     {
         return ERR_FILE_READ_ERROR;
     }
@@ -61,14 +61,13 @@ int ore::Map::Load(const char *file)
     if((node = xmlFile.RootElement()->FirstChildElement("tileset")) == NULL)
         return ERR_INVALID_TILESET;
 
-    //TODO hardcoding, not good... Use data from a config file later.
-    std::string defaultTilesetDir = "../data/maps/";
-    mTileSetsPath.clear();//In case of reloaing a map
-    for(; node; node = node->NextSiblingElement("tileset"))
-    {
-        mTileSetsPath.push_back(defaultTilesetDir +
-                   node->FirstChildElement("image")->Attribute("source"));
-    }
+//     //TODO<Use data from a config file later> (not hard-coding)
+//     std::string defaultTilesetDir = "../data/maps/";
+//     //TODO<Clear tilesets here> //In case of reloading a map
+//     for(; node; node = node->NextSiblingElement("tileset"))
+//     {
+//     //TODO<Load the tilesets>
+//     }
 
     //TODO Do the SDL part of loading tile images and so on
 
@@ -115,7 +114,6 @@ int ore::Map::Load(const char *file)
         {
             mLayers[i][k / 4] = uncompressed[k] | (uncompressed[k + 1] << 8) |
             (uncompressed[k + 2] << 16) | uncompressed[k + 3] << 24;
-            --mLayers[i][k /4]; // The tile count starts from 0, not 1
         }
         
         //Go to the next layer in the file
@@ -138,7 +136,7 @@ int ore::Map::Load(const char *file)
 //             std::cout << "Layer " << i << ": NULL\n";
 //         }
 //     }
-    return 0;
+    return SUCCESS;
 }
 
 int ore::Map::GetHeight() const

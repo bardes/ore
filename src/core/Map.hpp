@@ -1,46 +1,84 @@
 #ifndef MAP_HPP
 #define MAP_HPP
 
-#include <list>
+#include "Utils.hpp"
+
 #include <string>
-#include <map>
+//#include <vector>
+
 #include <sys/types.h>
-#include <vector>
 
 namespace ore
 {
-    //Constants
     const unsigned int Max_Layes = 8;
-
-    //Enums
-    enum MAP_ERRORS {
-        ERR_FILE_READ_ERROR = 1,
-        ERR_INVALID_MAP_DATA,
-        ERR_INVALID_TILE_DATA,
-        ERR_ZLIB_ERROR,
-        ERR_INVALID_COMPRESSION_METHOD,
-        ERR_INVALID_TILESET
-    };
-
-    //Classes
+    
     class Map
     {
     public:
         Map();
         ~Map();
-        int Load(const char *file);
+
+        /**
+         * This function loads a map from a .tmx file.
+         */
+        int Load(const std::string &file);
+
+        /**
+         * Gets the height of the map in tiles.
+         */
         int GetHeight() const;
+
+        /**
+         * Gets the width of the map in tiles.
+         */
         int GetWidth() const;
+
+        /**
+         * Gets the width of the tiles (in pixels of course).
+         */
         int GetTileWidth() const;
+
+        /**
+         * Gets the height of the tiles (in pixels of course).
+         */
         int GetTileHeight() const;
         
     private:
+        /**
+         * Path to the .tmx file.
+         */
         std::string mFilePath;
+
+        /**
+         * Height of the map (in tiles).
+         */
         uint mHeight;
+
+        /**
+         * Width of the map (in tiles).
+         */
         uint mWidth;
+
+        /**
+         * Width of the tiles.
+         */
         uint mTileWidth;
+
+        /**
+         * Height of the tiles.
+         */
         uint mTileHeight;
-        std::vector<std::string> mTileSetsPath;
+
+        /**
+         * A vector holding all tilesets of this map.
+         */
+        //std::vector<> mTilesets;
+
+        /**
+         * A two dimensional array of uints. The first dimension is the layer
+         * the second is the data of the layer. Each tile is represented by a
+         * unsigned int.
+         */
         uint *mLayers[Max_Layes];
     };
 }
