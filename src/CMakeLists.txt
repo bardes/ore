@@ -16,6 +16,3 @@ install(DIRECTORY core tinyXml DESTINATION include
         FILES_MATCHING PATTERN *.hpp PATTERN *.h)
 
 install(TARGETS ore ARCHIVE DESTINATION lib)
-
-add_executable(teste core/main.cpp)
-target_link_libraries(teste ore SDL SDL_image z)

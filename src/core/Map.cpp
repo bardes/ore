@@ -14,13 +14,13 @@
 ore::Map::Map() : mFilePath(""), mHeight(0), mWidth(0), mTileWidth(0),
 mTileHeight(0)
 {
-    for(uint i = 0; i < Max_Layers; ++i)
+    for(ore::uint i = 0; i < Max_Layers; ++i)
         mLayers[i] = NULL;
 }
 
 ore::Map::~Map()
 {
-    for(uint i = 0; i < Max_Layers; ++i)
+    for(ore::uint i = 0; i < Max_Layers; ++i)
         delete [] mLayers[i];
 }
 
@@ -33,7 +33,7 @@ int ore::Map::Load(const std::string &file)
     //Checking if the file opened without problems
     if (!xmlFile.LoadFile(file.c_str()))
     {
-        return ERR_FILE_READ_ERROR;
+        return ERR_MAP_READ_ERROR;
     }
     
     //Reading some basic info about this map
@@ -92,9 +92,6 @@ int ore::Map::Load(const std::string &file)
         //Saving it to the list
         mTilesets.push_back(tmp);//Something is wrong here...
 
-        //Debug
-        std::cout << tmp.GetPath() << std::endl;
-
         //!!!TODO!!! FIX THIS ASAP
         tmp.Clear();
     }
@@ -103,7 +100,7 @@ int ore::Map::Load(const std::string &file)
     if((element = xmlFile.RootElement()->FirstChildElement("layer")) == NULL)
         return ERR_INVALID_MAP_DATA;
 
-    for (uint i = 0; element && i < Max_Layers; ++i)
+    for (ore::uint i = 0; element && i < Max_Layers; ++i)
     {
         //Must be using zlib compression
         if (!element->FirstChildElement("data")->Attribute("compression"))
@@ -115,7 +112,7 @@ int ore::Map::Load(const std::string &file)
         //Decoding the base64 string
         //TODO Check for a NULL string
         std::string data = element->FirstChildElement("data")->GetText();
-        std::vector<Byte> decoded;
+        std::vector<ore::byte> decoded;
         base64decode(data, decoded);
 
         if(decoded.empty())
@@ -123,8 +120,8 @@ int ore::Map::Load(const std::string &file)
 
         //Now it's time to uncompress it. The expected size of the uncompressed
         //data is 4 times the number of tiles in the map. 4 bytes (one int) per tile
-        ulong expectedSize = 4 * mHeight * mWidth;
-        Byte uncompressed[expectedSize];
+        uLongf expectedSize = 4 * mHeight * mWidth;
+        ore::byte uncompressed[expectedSize];
         int err;
         if((err = uncompress(uncompressed, &expectedSize, decoded.data(),
             decoded.size())) < 0)
@@ -138,7 +135,7 @@ int ore::Map::Load(const std::string &file)
             return ERR_INVALID_MAP_DATA;
 
         //Converting (to int) and copying the layers data to the mLayers array
-        mLayers[i] = new uint[mHeight * mWidth];
+        mLayers[i] = new ore::uint[mHeight * mWidth];
         for(int k = 0; k < expectedSize; k += 4)
         {
             mLayers[i][k / 4] = uncompressed[k] | (uncompressed[k + 1] << 8) |

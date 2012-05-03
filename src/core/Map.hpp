@@ -53,22 +53,22 @@ namespace ore
         /**
          * Height of the map (in tiles).
          */
-        uint mHeight;
+        ore::uint mHeight;
 
         /**
          * Width of the map (in tiles).
          */
-        uint mWidth;
+        ore::uint mWidth;
 
         /**
          * Width of the tiles.
          */
-        uint mTileWidth;
+        ore::uint mTileWidth;
 
         /**
          * Height of the tiles.
          */
-        uint mTileHeight;
+        ore::uint mTileHeight;
 
         /**
          * A list holding all tilesets of this map.
@@ -76,11 +76,11 @@ namespace ore
         std::list<Tileset> mTilesets;
 
         /**
-         * A two dimensional array of uints. The first dimension is the layer
+         * A two dimensional array of ore::uints. The first dimension is the layer
          * the second is the data of the layer. Each tile is represented by a
-         * unsigned int.
+         * GID, which is an unsigned int .
          */
-        uint *mLayers[Max_Layers];
+        ore::uint *mLayers[Max_Layers];
     };
 }
 #endif // MAP_HPP
