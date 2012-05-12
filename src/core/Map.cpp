@@ -119,7 +119,7 @@ int ore::Map::Load(const std::string &file)
             return ERR_INVALID_MAP_DATA;
 
         //Now it's time to uncompress it. The expected size of the uncompressed
-        //data is 4 times the number of tiles in the map. 4 bytes (one int) per tile
+        //data is 4 times the number of tiles in the map. (one int per tile)
         uLongf expectedSize = 4 * mHeight * mWidth;
         ore::byte uncompressed[expectedSize];
         int err;

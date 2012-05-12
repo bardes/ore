@@ -24,6 +24,8 @@ namespace ore
         ERR_NO_PATH,
         ERR_NO_SDL_VIDEO,
         ERR_IMAGE_READ_ERROR,
+        ERR_TILESET_GID_OUT_OF_RANGE,
+        ERR_TILESET_NO_SURFACE,
         ERR_UNKNOWN
     };
     

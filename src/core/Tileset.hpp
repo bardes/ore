@@ -22,12 +22,12 @@ namespace ore
          * load the image mSurface becomes NULL, and all the data is reset to
          * the defaults.
          *
-         * @param path relative or absolute path to the image file
-         * @param fGid the first gid of this tileset
-         * @param tileWidth width of the tiles in pixels
-         * @param tileHeight height of the tiles in pixels
-         * @return Returns 0 on success or another [RETURN_VALUE](@ref ore::RETURN_VALUE)
-         * in case of failure.
+         * @param path relative or absolute path to the image file.
+         * @param fGid the first gid of this tileset.
+         * @param tileWidth width of the tiles in pixels.
+         * @param tileHeight height of the tiles in pixels.
+         * @return ore::SUCCESS on success or another ore::RETURN_VALUES in case
+         * of failure in case of failure.
          */
         int Load(const std::string &path, ore::uint fGid, ore::uint tileWidth = 0,
                  ore::uint tileHeight = 0);
@@ -36,6 +36,7 @@ namespace ore
          * This function reloads the tileset using mPath as the source image.
          * If mPath is not set or it fails to load the image mSurface becomes
          * NULL, and the data is reset to the defaults.
+         * @return ore::SUCCESS or another ore::RETURN_VALUES.
          */
         int Reload();
 
@@ -62,17 +63,20 @@ namespace ore
         
         /**
          * Blits a tile from this tileset into a given surface in the specified
-         * point. Returns 0 on success or a RETURN_VALUE on failure.
+         * point. Returns 0 on success or a RETURN_VALUES on failure.
          */
-        //TODO int BlitGidToSurface(SDL_Surface *destination, ore::uint xpos = 0, ore::uint ypos = 0);
+        int BlitGidToSurface(ore::uint gid,  SDL_Surface *destination,
+                             ore::uint xpos = 0, ore::uint ypos = 0);
         
         /**
-         * Checks if the given GID is part of this tileset. Returns TRUE if it is.
+         * Checks if the given GID is part of this tileset.
+         * @return true if is or false if it is not.
          */
         bool IsMyGid(ore::uint gid);
         
         /**
          * Gets the first GID belonging to this tiliset.
+         * @return the GID of the first tile.
          */
         ore::uint GetFirstGid()
         {
@@ -81,11 +85,13 @@ namespace ore
         
         /**
          * Gets the last GID belonging to this tileset.
+         * @return the GID of the last tile.
          */
         ore::uint GetLastGid();
         
         /**
          * Gets the tile height.
+         * @return tile height in pixels.
          */
         ore::uint GetTileHeight()
         {
@@ -94,6 +100,7 @@ namespace ore
         
         /**
          * Gets the tile width.
+         * @return tile width in pixels.
          */
         ore::uint GetTileWidth()
         {
@@ -102,16 +109,18 @@ namespace ore
         
         /**
          * Gets the height of the tileset image.
+         * @return the tileset height in pixels.
          */
-        ore::uint GetHeight()
+        ore::uint GetHeightP()
         {
             return mSurface->h;
         }
         
         /**
          * Gets the width of the tileset image.
+         * @return the tileset width in pixels.
          */
-        ore::uint GetWidth()
+        ore::uint GetWidthP()
         {
             return mSurface->w;
         }
@@ -131,6 +140,11 @@ namespace ore
         ore::uint mFirstGid;
         
         /**
+         * Last GID in this tileset.
+         */
+        ore::uint mLastGid;
+        
+        /**
          * Tile height.
          */
         ore::uint mTileHeight;
@@ -139,6 +153,16 @@ namespace ore
          * Tile width.
          */
         ore::uint mTileWidth;
+        
+        /**
+         * Height in tiles.
+         */
+        ore::uint mHeight;
+        
+        /**
+         * Width in tiles.
+         */
+        ore::uint mWidth;
 
         /**
          * Pointer to the SDL_Surface holding the content of this tileset.

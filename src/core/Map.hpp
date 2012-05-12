@@ -21,6 +21,7 @@ namespace ore
 
         /**
          * This function loads a map from a .tmx file.
+         * @return ore::SUCCESS or another ore::RETURN_VALUES in case of failure.
          */
         int Load(const std::string &file);
 
