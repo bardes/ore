@@ -4,8 +4,8 @@
 #include "Tileset.hpp"
 #include "Utils.hpp"
 
-#include <string>
 #include <list>
+#include <string>
 
 #include <sys/types.h>
 

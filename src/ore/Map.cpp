@@ -24,6 +24,7 @@ ore::Map::~Map()
         delete [] mLayers[i];
 }
 
+//TODO Add error messages!
 int ore::Map::Load(const std::string &file)
 {
 
@@ -33,7 +34,7 @@ int ore::Map::Load(const std::string &file)
     //Checking if the file opened without problems
     if (!xmlFile.LoadFile(file.c_str()))
     {
-        return ERR_MAP_READ_ERROR;
+        return ore::ERR_MAP_READ_ERROR;
     }
     
     //Reading some basic info about this map
@@ -51,7 +52,7 @@ int ore::Map::Load(const std::string &file)
     
     //Checking if all info is valid
     if (!(mWidth && mHeight && mTileHeight && mTileWidth))
-        return ERR_INVALID_MAP_DATA;
+        return ore::ERR_INVALID_MAP_DATA;
     
     //Used to iterate through some xml elements later
     TiXmlElement *element;
@@ -61,7 +62,7 @@ int ore::Map::Load(const std::string &file)
     
     //Loading the tileset
     if((element = xmlFile.RootElement()->FirstChildElement("tileset")) == NULL)
-        return ERR_INVALID_TILESET;
+        return ore::ERR_INVALID_TILESET;
 
     //TODO Use data from a config file later (not hard-coding)
     std::string defaultTilesetDir = "./";
@@ -77,37 +78,38 @@ int ore::Map::Load(const std::string &file)
         //Reading the first gid
         element->Attribute("firstgid", &firstGid);
         if(firstGid == 0)
-            return ERR_INVALID_TILESET;
+        {
+            std::cerr << "First GID can not be 0!";
+            return ore::ERR_INVALID_TILESET;
+        }
 
         //Getting the path to the image file
         if(element->FirstChildElement("image"))
             path = element->FirstChildElement("image")->Attribute("source");
         else
-            return ERR_INVALID_TILESET;                
+            return ore::ERR_INVALID_TILESET;
 
-        //Loading the tileset
-        if((err = tmp.Load(defaultTilesetDir + path, firstGid)) != SUCCESS)
+        //Loading the tileset (I think there is a smarter way of doing this...)
+        if((err = tmp.Load(defaultTilesetDir + path, firstGid,
+                                 mTileWidth, mTileHeight)) != ore::SUCCESS)
+        {
             return err;
-
-        //Saving it to the list
-        mTilesets.push_back(tmp);//Something is wrong here...
-
-        //!!!TODO!!! FIX THIS ASAP
-        tmp.Clear();
+        }
+        mTilesets.push_back(tmp);
     }
 
     //Searching for the first layer
     if((element = xmlFile.RootElement()->FirstChildElement("layer")) == NULL)
-        return ERR_INVALID_MAP_DATA;
+        return ore::ERR_INVALID_MAP_DATA;
 
     for (ore::uint i = 0; element && i < Max_Layers; ++i)
     {
         //Must be using zlib compression
         if (!element->FirstChildElement("data")->Attribute("compression"))
-            return ERR_INVALID_COMPRESSION_METHOD;
+            return ore::ERR_INVALID_COMPRESSION_METHOD;
         else if(strcmp(element->FirstChildElement("data")->
                        Attribute("compression"), "zlib"))
-            return ERR_INVALID_COMPRESSION_METHOD;
+            return ore::ERR_INVALID_COMPRESSION_METHOD;
 
         //Decoding the base64 string
         //TODO Check for a NULL string
@@ -116,7 +118,7 @@ int ore::Map::Load(const std::string &file)
         base64decode(data, decoded);
 
         if(decoded.empty())
-            return ERR_INVALID_MAP_DATA;
+            return ore::ERR_INVALID_MAP_DATA;
 
         //Now it's time to uncompress it. The expected size of the uncompressed
         //data is 4 times the number of tiles in the map. (one int per tile)
@@ -127,12 +129,12 @@ int ore::Map::Load(const std::string &file)
             decoded.size())) < 0)
         {
             std::cerr << "zlib error code: " << err << std::endl;
-            return ERR_ZLIB_ERROR;
+            return ore::ERR_ZLIB_ERROR;
         }
 
         //If the size is no longer the same, something is wrong with the data
         if(expectedSize != 4 * mHeight * mWidth)
-            return ERR_INVALID_MAP_DATA;
+            return ore::ERR_INVALID_MAP_DATA;
 
         //Converting (to int) and copying the layers data to the mLayers array
         mLayers[i] = new ore::uint[mHeight * mWidth];
@@ -148,7 +150,7 @@ int ore::Map::Load(const std::string &file)
 
     //TODO Pre render the layers
 
-//      //Debug
+//     //Debug
 //     for(int i = 0; i < Max_Layers; ++i)
 //     {
 //         if(mLayers[i])
@@ -164,7 +166,7 @@ int ore::Map::Load(const std::string &file)
 //             std::cout << "Layer " << i << ": NULL\n";
 //         }
 //     }
-    return SUCCESS;
+    return ore::SUCCESS;
 }
 
 int ore::Map::GetHeight() const

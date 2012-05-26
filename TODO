@@ -1,0 +1,7 @@
+-Use SFML instead of SDL
+--Port Tileset class
+--Port Map class
+
+-Use python to handle the ui and the NPCs logic
+--Lots of work....
+

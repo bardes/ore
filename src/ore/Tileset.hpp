@@ -3,9 +3,9 @@
 
 #include "Utils.hpp"
 
-#include <string>
+#include <SFML/Graphics.hpp>
 
-#include <SDL/SDL.h>
+#include <string>
 
 #include <sys/types.h>
 
@@ -15,7 +15,7 @@ namespace ore
     {
     public:
         Tileset();
-        ~Tileset();
+        //~Tileset();
 
         /**
          * This function loads the tileset from a source image. If it fails to
@@ -29,8 +29,8 @@ namespace ore
          * @return ore::SUCCESS on success or another ore::RETURN_VALUES in case
          * of failure in case of failure.
          */
-        int Load(const std::string &path, ore::uint fGid, ore::uint tileWidth = 0,
-                 ore::uint tileHeight = 0);
+        int Load(const std::string &path, ore::uint fGid, ore::uint tileWidth,
+                 ore::uint tileHeight);
 
         /**
          * This function reloads the tileset using mPath as the source image.
@@ -39,40 +39,28 @@ namespace ore
          * @return ore::SUCCESS or another ore::RETURN_VALUES.
          */
         int Reload();
-
-        /**
-         * Gets the path of the image.
-         */
-        const std::string& GetPath() const;
-        
-        /**
-         * Gets the surface of this tileset.
-         */
-        SDL_Surface* GetSurface()
-        {
-            return mSurface;
-        }
-        
-        /**
-         * Gets the surface of this tileset.
-         */
-        const SDL_Surface* GetSurface() const
-        {
-            return mSurface;
-        }
-        
-        /**
-         * Blits a tile from this tileset into a given surface in the specified
-         * point. Returns 0 on success or a RETURN_VALUES on failure.
-         */
-        int BlitGidToSurface(ore::uint gid,  SDL_Surface *destination,
-                             ore::uint xpos = 0, ore::uint ypos = 0);
         
         /**
          * Checks if the given GID is part of this tileset.
          * @return true if is or false if it is not.
          */
         bool IsMyGid(ore::uint gid);
+
+        /**
+         * Gets the path of the image.
+         */
+        const std::string& GetPath() const
+        {
+            return mPath;
+        }
+        
+        /**
+         * Gets the surface of this tileset.
+         */
+        const sf::Texture& GetTexture() const
+        {
+            return mTexture;
+        }
         
         /**
          * Gets the first GID belonging to this tiliset.
@@ -87,7 +75,10 @@ namespace ore
          * Gets the last GID belonging to this tileset.
          * @return the GID of the last tile.
          */
-        ore::uint GetLastGid();
+        ore::uint GetLastGid()
+        {
+            return mHeight * mWidth + mFirstGid - 1;
+        }
         
         /**
          * Gets the tile height.
@@ -113,7 +104,7 @@ namespace ore
          */
         ore::uint GetHeightP()
         {
-            return mSurface->h;
+            return mTexture.getSize().y;
         }
         
         /**
@@ -122,15 +113,8 @@ namespace ore
          */
         ore::uint GetWidthP()
         {
-            return mSurface->w;
+            return mTexture.getSize().x;
         }
-
-        /**
-         * DO NOT USE THIS FUNCTION
-         * This function is a workaround, it may lead to memory leaks if used
-         * incorrectly. It will be removed ASAP.
-         */
-        void Clear();
         
     private:
         /**
@@ -165,9 +149,9 @@ namespace ore
         ore::uint mWidth;
 
         /**
-         * Pointer to the SDL_Surface holding the content of this tileset.
+         * This holds the tiles image.
          */
-        SDL_Surface *mSurface;
+        sf::Texture mTexture;
 
         /**
          * The path to the image file.

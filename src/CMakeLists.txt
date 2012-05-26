@@ -1,7 +1,7 @@
 SET(src
-    core/Map.cpp
-    core/Tileset.cpp
-    core/Utils.cpp
+    ore/Map.cpp
+    ore/Tileset.cpp
+    ore/Utils.cpp
     tinyXml/tinystr.cpp
     tinyXml/tinyxml.cpp
     tinyXml/tinyxmlerror.cpp
@@ -10,9 +10,7 @@ SET(src
 
 add_library(ore ${src})
 
-target_link_libraries(ore z)
-
-install(DIRECTORY core tinyXml DESTINATION include
+install(DIRECTORY ore tinyXml DESTINATION include
         FILES_MATCHING PATTERN *.hpp PATTERN *.h)
 
 install(TARGETS ore ARCHIVE DESTINATION lib)
