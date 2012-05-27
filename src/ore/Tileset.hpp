@@ -29,8 +29,8 @@ namespace ore
          * @return ore::SUCCESS on success or another ore::RETURN_VALUES in case
          * of failure in case of failure.
          */
-        int Load(const std::string &path, ore::uint fGid, ore::uint tileWidth,
-                 ore::uint tileHeight);
+        ore::RETURN_VALUE Load(const std::string &path, ore::uint fGid,
+                               ore::uint tileWidth, ore::uint tileHeight);
 
         /**
          * This function reloads the tileset using mPath as the source image.
@@ -38,10 +38,12 @@ namespace ore
          * NULL, and the data is reset to the defaults.
          * @return ore::SUCCESS or another ore::RETURN_VALUES.
          */
-        int Reload();
+        ore::RETURN_VALUE Reload();
         
         /**
          * Checks if the given GID is part of this tileset.
+         * 
+         * @param gid Global ID of the tile you want to check.
          * @return true if is or false if it is not.
          */
         bool IsMyGid(ore::uint gid);

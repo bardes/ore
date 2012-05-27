@@ -13,8 +13,8 @@ mHeight(0), mWidth(0), mPath("")
     //Nothing to do here.
 }
 
-int ore::Tileset::Load (const std::string& path, ore::uint fGid,
-                        ore::uint tileWidth, uint tileHeight)
+ore::RETURN_VALUE ore::Tileset::Load (const std::string& path, ore::uint fGid, 
+                                      ore::uint tileWidth, uint tileHeight)
 {
     //Getting rid of the old data
     mFirstGid = mLastGid = mTileHeight = mTileWidth = mHeight = mWidth = 0;
@@ -23,8 +23,7 @@ int ore::Tileset::Load (const std::string& path, ore::uint fGid,
     //Loading the tiles from the file.
     if(!mTexture.loadFromFile(path))
     {
-        std::cerr << "SFML error: Dunno what happened...";
-        return ore::ERR_UNKNOWN;
+        return ore::ERR_TILESET_IMAGE_READ_ERROR;
     }
 
     //Saving the loaded data into the tileset
@@ -38,10 +37,10 @@ int ore::Tileset::Load (const std::string& path, ore::uint fGid,
     return ore::SUCCESS;
 }
 
-int ore::Tileset::Reload()
+ore::RETURN_VALUE ore::Tileset::Reload()
 {
     if(mPath.empty())
-        return ore::ERR_NO_PATH;
+        return ore::ERR_TILESET_NO_PATH;
     
     return Load(mPath, mFirstGid, mTileWidth, mTileHeight);
     

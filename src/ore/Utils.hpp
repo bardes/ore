@@ -6,26 +6,24 @@
 
 namespace ore
 {
-    //Constants
-
     //Typedefs
     typedef unsigned char byte;
     typedef unsigned int uint;
 
     //Enums
-    //TODO Use better names. Eg: <ERR/WRN>_<where it happened>_<description>
-    enum RETURN_VALUES {
+    /**
+     * This enum makes it easier to know what a return value means...
+     * ERR_[CLASS]_[DESCRIPTION]
+     */
+    enum RETURN_VALUE {
         SUCCESS = 0,
         ERR_MAP_READ_ERROR,
-        ERR_INVALID_MAP_DATA,
-        ERR_ZLIB_ERROR,
-        ERR_INVALID_COMPRESSION_METHOD,
-        ERR_INVALID_TILESET,
-        ERR_NO_PATH,
-        ERR_NO_SDL_VIDEO,
-        ERR_IMAGE_READ_ERROR,
-        ERR_TILESET_GID_OUT_OF_RANGE,
-        ERR_TILESET_NO_SURFACE,
+        ERR_MAP_INVALID_DATA,
+        ERR_MAP_ZLIB_ERROR,
+        ERR_MAP_INVALID_COMPRESSION_METHOD,
+        ERR_MAP_INVALID_TILESET,
+        ERR_TILESET_NO_PATH,
+        ERR_TILESET_IMAGE_READ_ERROR,
         ERR_UNKNOWN
     };
     
