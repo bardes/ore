@@ -7,22 +7,23 @@
 
 #include <sys/types.h>
 
-ore::Tileset::Tileset() : mFirstGid(0), mLastGid(0), mTileHeight(0),mTileWidth(0),
-mHeight(0), mWidth(0), mPath("")
+ore::Tileset::Tileset() : mFirstGid(0), mLastGid(0), mTileHeight(0),
+mTileWidth(0), mHeight(0), mWidth(0), mPath("")
 {
     //Nothing to do here.
 }
 
-ore::RETURN_VALUE ore::Tileset::Load (const std::string& path, ore::uint fGid, 
-                                      ore::uint tileWidth, uint tileHeight)
+ore::RETURN_VALUE ore::Tileset::Load (const std::string& path, ore::uint16 fGid,
+                                      ore::uint8 tileWidth, uint8 tileHeight)
 {
     //Getting rid of the old data
     mFirstGid = mLastGid = mTileHeight = mTileWidth = mHeight = mWidth = 0;
     mPath.clear();
-    
+
     //Loading the tiles from the file.
     if(!mTexture.loadFromFile(path))
     {
+        std::cout << "Error: could not load this image: " << path << std::endl;
         return ore::ERR_TILESET_IMAGE_READ_ERROR;
     }
 
@@ -33,7 +34,7 @@ ore::RETURN_VALUE ore::Tileset::Load (const std::string& path, ore::uint fGid,
     mTileWidth = tileWidth;
     mHeight = mTexture.getSize().y / mTileHeight;
     mWidth = mTexture.getSize().x / tileWidth;
-    
+
     return ore::SUCCESS;
 }
 
@@ -41,12 +42,12 @@ ore::RETURN_VALUE ore::Tileset::Reload()
 {
     if(mPath.empty())
         return ore::ERR_TILESET_NO_PATH;
-    
+
     return Load(mPath, mFirstGid, mTileWidth, mTileHeight);
-    
+
 }
 
-bool ore::Tileset::IsMyGid(ore::uint gid)
+bool ore::Tileset::IsMyGid(ore::uint16 gid)
 {
-    return (gid >= mFirstGid) && (gid <= GetLastGid());
+    return (gid >= mFirstGid) && (gid <= mLastGid);
 }

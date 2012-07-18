@@ -2,6 +2,7 @@ SET(src
     ore/Map.cpp
     ore/Tileset.cpp
     ore/Utils.cpp
+    ore/Layer.cpp
     tinyXml/tinystr.cpp
     tinyXml/tinyxml.cpp
     tinyXml/tinyxmlerror.cpp
@@ -9,6 +10,8 @@ SET(src
 )
 
 add_library(ore ${src})
+
+target_link_libraries(ore sfml-system sfml-graphics sfml-window)
 
 install(DIRECTORY ore tinyXml DESTINATION include
         FILES_MATCHING PATTERN *.hpp PATTERN *.h)

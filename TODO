@@ -1,7 +1,8 @@
--Use SFML instead of SDL
---Port Tileset class
---Port Map class
+-Use exceptions to report errors
+--Update the map Load() function
+--Update the tileset Load() function
+--Update the rest
+--Update ore::RETURN_VALUE
 
 -Use python to handle the ui and the NPCs logic
---Lots of work....
 

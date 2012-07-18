@@ -10,11 +10,17 @@
 #include <sys/types.h>
 
 namespace ore
-{    
+{
     class Tileset
     {
     public:
+        /**
+         * Default constructor.
+         */
         Tileset();
+
+        //TODO Other kinds of constructors
+
         //~Tileset();
 
         /**
@@ -29,8 +35,8 @@ namespace ore
          * @return ore::SUCCESS on success or another ore::RETURN_VALUES in case
          * of failure in case of failure.
          */
-        ore::RETURN_VALUE Load(const std::string &path, ore::uint fGid,
-                               ore::uint tileWidth, ore::uint tileHeight);
+        ore::RETURN_VALUE Load(const std::string &path, ore::uint16 fGid,
+                               ore::uint8 tileWidth, ore::uint8 tileHeight);
 
         /**
          * This function reloads the tileset using mPath as the source image.
@@ -39,14 +45,14 @@ namespace ore
          * @return ore::SUCCESS or another ore::RETURN_VALUES.
          */
         ore::RETURN_VALUE Reload();
-        
+
         /**
          * Checks if the given GID is part of this tileset.
-         * 
+         *
          * @param gid Global ID of the tile you want to check.
          * @return true if is or false if it is not.
          */
-        bool IsMyGid(ore::uint gid);
+        bool IsMyGid(ore::uint16 gid);
 
         /**
          * Gets the path of the image.
@@ -55,7 +61,7 @@ namespace ore
         {
             return mPath;
         }
-        
+
         /**
          * Gets the surface of this tileset.
          */
@@ -63,92 +69,92 @@ namespace ore
         {
             return mTexture;
         }
-        
+
         /**
          * Gets the first GID belonging to this tiliset.
          * @return the GID of the first tile.
          */
-        ore::uint GetFirstGid()
+        ore::uint16 GetFirstGid()
         {
             return mFirstGid;
         }
-        
+
         /**
          * Gets the last GID belonging to this tileset.
          * @return the GID of the last tile.
          */
-        ore::uint GetLastGid()
+        ore::uint16 GetLastGid()
         {
             return mHeight * mWidth + mFirstGid - 1;
         }
-        
+
         /**
          * Gets the tile height.
          * @return tile height in pixels.
          */
-        ore::uint GetTileHeight()
+        ore::uint8 GetTileHeight()
         {
             return mTileHeight;
         }
-        
+
         /**
          * Gets the tile width.
          * @return tile width in pixels.
          */
-        ore::uint GetTileWidth()
+        ore::uint8 GetTileWidth()
         {
             return mTileWidth;
         }
-        
+
         /**
          * Gets the height of the tileset image.
          * @return the tileset height in pixels.
          */
-        ore::uint GetHeightP()
+        ore::uint32 GetHeightP()
         {
             return mTexture.getSize().y;
         }
-        
+
         /**
          * Gets the width of the tileset image.
          * @return the tileset width in pixels.
          */
-        ore::uint GetWidthP()
+        ore::uint32 GetWidthP()
         {
             return mTexture.getSize().x;
         }
-        
+
     private:
         /**
          * First GID represented by this tile. -1 if not set.
-         * (GID = Global ID = A number that represents any tile from any tiliset) 
+         * (GID = Global ID = A number that represents any tile from any tiliset)
          */
-        ore::uint mFirstGid;
-        
+        ore::uint16 mFirstGid;
+
         /**
          * Last GID in this tileset.
          */
-        ore::uint mLastGid;
-        
+        ore::uint16 mLastGid;
+
         /**
          * Tile height.
          */
-        ore::uint mTileHeight;
-        
+        ore::uint8 mTileHeight;
+
         /**
          * Tile width.
          */
-        ore::uint mTileWidth;
-        
+        ore::uint8 mTileWidth;
+
         /**
          * Height in tiles.
          */
-        ore::uint mHeight;
-        
+        ore::uint8 mHeight;
+
         /**
          * Width in tiles.
          */
-        ore::uint mWidth;
+        ore::uint8 mWidth;
 
         /**
          * This holds the tiles image.

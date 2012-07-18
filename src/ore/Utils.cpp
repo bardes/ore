@@ -4,11 +4,11 @@
 #include <vector>
 
 void ore::base64decode(const std::string &encodedString,
-                  std::vector<ore::byte> &decodedData)
+                  std::vector<ore::uint8> &decodedData)
 {
     //Making sure decodedData is empty before we start...
     decodedData.clear();
-    
+
     //This array tells the integer value of a character based in it's position
     //eg: A=0 B=1 C=3 ....
     char characters[64] = {'A','B','C','D','E','F','G','H','I','J','K','L','M',
@@ -16,16 +16,16 @@ void ore::base64decode(const std::string &encodedString,
                            'a','b','c','d','e','f','g','h','i','j','k','l','m',
                            'n','o','p','q','r','s','t','u','v','w','x','y','z',
                            '0','1','2','3','4','5','6','7','8','9','+','/'};
-    
+
     //Is it a valid string
     if(encodedString.length() < 4)
         return;
-    
+
     //Measuring the string (without any paddings)
     unsigned int len = 0;
     while(encodedString[len] != '=' && len < encodedString.length())
         ++len;
-    
+
     //This block gets the 6-bit integer value of the base64 string
     unsigned char values[len];
     unsigned int i; //General iterator
