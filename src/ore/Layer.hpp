@@ -3,6 +3,9 @@
 
 #include "Utils.hpp"
 
+#include <SFML/Graphics.hpp>
+
+#include <string>
 #include <vector>
 
 namespace ore
@@ -11,13 +14,16 @@ namespace ore
     {
     public:
 
-        Layer(ore::uint8 width, ore::uint8 height);
-
-        //Layer(const Layer& other);
+        Layer(ore::uint8 w, ore::uint8 h, const std::string &name);
 
         ore::uint16& operator[](ore::uint16 index);
 
         const ore::uint16& operator[](ore::uint16 index) const;
+
+        /**
+         * Resets all data to default.
+         */
+        void Clear();
 
         /**
          * Gets the height of the map in tiles.
@@ -36,39 +42,30 @@ namespace ore
         }
 
         /**
-         * Gets the height of the tiles (in pixels of course).
+         * Gets the index of a tile based on it's position
          */
-        ore::uint8 GetTileHeight() const
+        ore::uint16 GetIndex(ore::uint8 xPos, ore::uint8 yPos)
         {
-            return mTileHeight;
+            return (yPos * mWidth) + xPos;
         }
 
         /**
-         * Gets the width of the tiles (in pixels of course).
-         */
-        ore::uint8 GetTileWidth() const
-        {
-            return mTileWidth;
-        }
-
-        /**
-         * Gets a GID based in it's position.
+         * Gets a GID based on it's position.
          * @return the GID value, or 0 in case of failure.
          */
-        ore::uint16 GetGid(ore::uint8 xPos, ore::uint8 yPos) const;
+        ore::uint16 GetGid(ore::uint8 xPos, ore::uint8 yPos) const
+        {
+            return mGids[(yPos * mWidth) + xPos];
+        }
 
         /**
          * Gets a GID by the index.
          * @return the GID value, or 0 in case of failure.
          */
-        ore::uint16 GetGid(ore::uint16 index) const;
-
-        /**
-         * This function draws this layer into the given drawable object, and
-         * also draws the given characters if necessary.
-         */
-        //ore::RETURN_VALUE Draw() const; //TODO
-
+        ore::uint16 GetGid(ore::uint16 index) const
+        {
+            return mGids[index];
+        }
 
     private:
         /**
@@ -82,14 +79,9 @@ namespace ore
         ore::uint8 mHeight;
 
         /**
-         * Width of the tiles.
+         * Name of the layer.
          */
-        ore::uint8 mTileWidth;
-
-        /**
-         * Height of the tiles.
-         */
-        ore::uint8 mTileHeight;
+        std::string mName;
 
         /**
          * This holds the GIDs of this layer.

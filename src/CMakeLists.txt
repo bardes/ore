@@ -1,7 +1,7 @@
 SET(src
+    ore/Base64.cpp
     ore/Map.cpp
     ore/Tileset.cpp
-    ore/Utils.cpp
     ore/Layer.cpp
     tinyXml/tinystr.cpp
     tinyXml/tinyxml.cpp

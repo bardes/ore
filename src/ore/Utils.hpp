@@ -1,5 +1,5 @@
-#ifndef BASE64_HPP
-#define BASE64_HPP
+#ifndef UTILS_HPP
+#define UTILS_HPP
 
 #include <string>
 #include <vector>
@@ -21,26 +21,19 @@ namespace ore
 
     //Enums
     /**
-     * This enum makes it easier to know what a return value means. e.g.:
-     * ERR_[CLASS]_[DESCRIPTION]
+     * Values to be thrown during exceptions.
      */
-    enum RETURN_VALUE {
-        ERR_MAP_READ_ERROR,
-        ERR_MAP_INVALID_DATA,
-        ERR_MAP_ZLIB_ERROR,
-        ERR_MAP_INVALID_COMPRESSION_METHOD,
-        ERR_MAP_INVALID_TILESET,
-        ERR_TILESET_NO_PATH,
-        ERR_TILESET_IMAGE_READ_ERROR,
+    enum EXCEPTION {
+        BAD_ALLOC,
         INDEX_OUT_OF_RANGE,
-        SUCCESS
+        INVALID_COMPRESSION_METHOD,
+        INVALID_MAP_DATA,
+        INVALID_TILESET,
+        IMAGE_READ_ERROR,
+        NO_PATH,
+        MAP_READ_ERROR,
+        TILESET_COLLISION,
+        ZLIB_ERROR
     };
-
-    /**
-    * This function takes an encoded string and decodes it into an ore::uint8
-    * vector. decodedData will be an empty vector on failure.
-    **/
-    void base64decode(const std::string &encodedString,
-                    std::vector<ore::uint8> &decodedData);
 }
-#endif // BASE64_HPP
+#endif // UTILS_HPP

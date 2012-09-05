@@ -1,8 +1,9 @@
 #include "Layer.hpp"
 
-ore::Layer::Layer(ore::uint8 width, ore::uint8 height)
+ore::Layer::Layer(ore::uint8 w, ore::uint8 h, const std::string &name) :
+mWidth(w), mHeight(h), mName(name)
 {
-    mGids.reserve(width*height);
+    mGids.reserve(w * h);
 }
 
 ore::uint16& ore::Layer::operator[](ore::uint16 index)
@@ -19,4 +20,10 @@ const ore::uint16& ore::Layer::operator[](ore::uint16 index) const
     return mGids[index];
 }
 
+void ore::Layer::Clear()
+{
+    mGids.clear();
+    mName.clear();
+    mWidth = mHeight = 0;
+}
 

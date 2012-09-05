@@ -25,26 +25,23 @@ namespace ore
 
         /**
          * This function loads the tileset from a source image. If it fails to
-         * load the image mSurface becomes NULL, and all the data is reset to
+         * load the image an exception is thrown, and all the data is reset to
          * the defaults.
          *
          * @param path relative or absolute path to the image file.
          * @param fGid the first gid of this tileset.
          * @param tileWidth width of the tiles in pixels.
          * @param tileHeight height of the tiles in pixels.
-         * @return ore::SUCCESS on success or another ore::RETURN_VALUES in case
-         * of failure in case of failure.
          */
-        ore::RETURN_VALUE Load(const std::string &path, ore::uint16 fGid,
+        void Load(const std::string &path, ore::uint16 fGid,
                                ore::uint8 tileWidth, ore::uint8 tileHeight);
 
         /**
          * This function reloads the tileset using mPath as the source image.
-         * If mPath is not set or it fails to load the image mSurface becomes
-         * NULL, and the data is reset to the defaults.
-         * @return ore::SUCCESS or another ore::RETURN_VALUES.
+         * If mPath is not set or it fails to load the image an exception is
+         * thrown, and all the data is reset to defaults.
          */
-        ore::RETURN_VALUE Reload();
+        void Reload();
 
         /**
          * Checks if the given GID is part of this tileset.

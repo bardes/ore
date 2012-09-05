@@ -1,3 +1,4 @@
+#include "Base64.hpp"
 #include "Utils.hpp"
 
 #include <string>

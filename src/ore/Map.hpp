@@ -17,41 +17,32 @@ namespace ore
     class Map
     {
     public:
-        /**
-         * Default constructor.
-         */
+
         Map();
 
-        /**
-         * Destructor.
-         */
         ~Map();
 
         /**
          * This function loads a map from a .tmx file.
-         * @return ore::SUCCESS when successful or a different ore::RETURN_VALUE
-         * in case of failure.
          */
-        ore::RETURN_VALUE Load(const std::string &file);
+        void Load(const std::string &file);
 
         /**
-         * This function renders a layer of this map into the given sf::Drawable
+         * This functions adds a tileset to the map.
+         * @param path Path to the tileset image.
+         * @param fGid first GID of the tileset.
+         * @param tw width of each tile (in pixels).
+         * @param th height of each tile (in pixels).
          */
-        ore::RETURN_VALUE RenderLayer(ore::uint8 layer,
-                                      const sf::Drawable &destination);
-
-        /**
-         * This functions adds a tileset to this map.
-         */
-        ore::RETURN_VALUE AddTileset(std::string &path, ore::uint16 fGid,
+        void AddTileset(std::string &path, ore::uint16 fGid,
                                      ore::uint8 tw, ore::uint8 th);
 
-        /**
+        /***
          * This function deletes a tileset from this map. The first gid of the
          * tileset is used to idntify which tileset will be deleted.
          * @return false if can't find or delete the tileset.
          */
-        //DeleteTileset(sf::uint16 firstGid)
+        //TODO bool DeleteTileset(sf::uint16 firstGid)
 
         /**
          * This function adds a layer on top of the others.
@@ -60,7 +51,13 @@ namespace ore
          * @param height Height of the layer in tiles.
          */
         void AddLayer(const std::string &data, ore::uint8 width,
-                      ore::uint8 height);
+                      ore::uint8 height, const std::string &name);
+
+        /**
+         * Clears all data from the map. It does delete the layers and tilesets
+         * also.
+         */
+        void Clear();
 
         /**
          * Gets the height of the map in tiles.
@@ -103,6 +100,7 @@ namespace ore
                 mPlayerLayer = layer;
         }
 
+        // Just for tests (remove later)
         ore::uint8 GetLayers() const
         {
             return mLayers.size();
@@ -140,6 +138,11 @@ namespace ore
         ore::uint8 mPlayerLayer;
 
         /**
+         * Flag to indicate whether the cache needs to be updated or not.
+         */
+        bool mCached;
+
+        /**
          * A vector of pointers to the tilesets of this map.
          */
         std::vector<Tileset*> mTilesets;
@@ -152,12 +155,12 @@ namespace ore
         /**
          * This holds a pre-rendered image of all bottom layers (under the player)
          */
-        sf::Texture mLayerCacheBotom;
+        sf::RenderTexture mLayerCacheBotom;
 
         /**
          * This holds a pre-rendered image of all top layers (above the player)
          */
-        sf::Texture mLayerCacheTop;
+        sf::RenderTexture mLayerCacheTop;
     };
 }
 #endif // MAP_HPP
