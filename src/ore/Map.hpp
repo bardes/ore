@@ -12,7 +12,7 @@
 
 namespace ore
 {
-    const unsigned int Max_Layers = 255;
+    const unsigned int Max_Layers = 256;
 
     class Map
     {

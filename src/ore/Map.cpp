@@ -70,13 +70,6 @@ void ore::Map::Load(const std::string &file)
     xmlFile.RootElement()->Attribute("tilewidth", &TileWidth);
     xmlFile.RootElement()->Attribute("tileheight", &TileHeight);
 
-    //Saving the data read from the map
-    mWidth = Width;
-    mHeight = Height;
-    mTileWidth = TileWidth;
-    mTileHeight = TileHeight;
-    mFilePath = file;
-
     //Checking if all properties are valid
     if(Width < 1 || Height < 1 || TileWidth < 1 || TileHeight < 1)
     {
@@ -84,11 +77,15 @@ void ore::Map::Load(const std::string &file)
         throw ore::INVALID_MAP_DATA;
     }
 
+    //Saving the data read from the map
+    mWidth = Width;
+    mHeight = Height;
+    mTileWidth = TileWidth;
+    mTileHeight = TileHeight;
+    mFilePath = file;
+
     //Used to iterate through some xml elements later
     TiXmlElement *element;
-
-    //Generic counter used for different things during the lading process
-    int count = 0;
 
     //Loading the tileset
     if((element = xmlFile.RootElement()->FirstChildElement("tileset")) == NULL)
@@ -96,23 +93,6 @@ void ore::Map::Load(const std::string &file)
         std::cerr << "Error: Could not find any tileset on this map: "
         << file << "\n";
         throw ore::INVALID_TILESET;
-    }
-
-    //Getting the directory path of this map
-    int slashPos;
-    std::string mapDir;
-    for(slashPos = 1; slashPos < file.length(); ++slashPos)
-    {
-        if((*(file.end() - slashPos)) == '/')
-            break;
-    }
-    //There may be no slashes at all, which means the current working directory
-    //is the map dir. In this case nothing needs to be added to the tileset path
-    if(slashPos < file.length())
-    {
-        //Erasing the file name from the end of the path
-        //The +1 in the end is to keep the slash ("/") at the end of the path
-        mapDir.assign(file, 0, file.length() - slashPos + 1);
     }
 
     //Loading the tilesets
@@ -127,7 +107,7 @@ void ore::Map::Load(const std::string &file)
         element->Attribute("firstgid", &firstGid);
         if(firstGid == 0)
         {
-            std::cerr << "Error: First GID can not be 0!";
+            std::cerr<<"Error: Invalid first GID. (not found or equals to 0)\n";
             throw ore::INVALID_TILESET;
         }
 
