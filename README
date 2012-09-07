@@ -1,4 +1,4 @@
-﻿-----------------------------------ReadeMe--------------------------------------
+﻿-----------------------------------Read-Me--------------------------------------
          _______                   _____                    _____          
         /::\    \                 /\    \                  /\    \         
        /::::\    \               /::\    \                /::\    \        
@@ -15,10 +15,10 @@
    \:::\    /:::/    /          |:::::::::/    /    \:::\   \:::\    \     
     \:::\__/:::/    /           |::|\::::/    /      \:::\   \:::\____\    
      \::::::::/    /            |::| \::/____/        \:::\   \::/    /    
-      \::::::/    /             |::|  ~|               \:::\   \/____/     
+      \::::::/    /             |::|   |               \:::\   \/____/     
        \::::/    /              |::|   |                \:::\    \         
         \::/____/               \::|   |                 \:::\____\        
-         ~~                      \:|   |                  \::/    /        
+                                 \:|   |                  \::/    /        
                                   \|___|                   \/____/ 
 
 
@@ -31,9 +31,9 @@ Created in: May, 2011
 License: CC-BY 3.0 (http://creativecommons.org/licenses/by/3.0/)
 
 --------------------------------What it does?-----------------------------------
-ORE is supposed to be a library, that helps the creation of RPG games by
+ORE is supposed to be a library that helps the creation of RPG games by
 providing some of the most common stuff like: maps, characters, NPCs, etc... The
-idea is to make things easier for the programmer (in the engine side at least)
+idea is to make things easier for the programmer (on the engine side at least)
 so he/she may spend more time developing the game than solving engine problems
 or bugs.
 
