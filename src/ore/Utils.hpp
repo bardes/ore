@@ -23,7 +23,8 @@ namespace ore
     /**
      * Values to be thrown during exceptions.
      */
-    enum EXCEPTION {
+    enum EXCEPTION
+    {
         BAD_ALLOC,
         INDEX_OUT_OF_RANGE,
         INVALID_COMPRESSION_METHOD,
@@ -35,5 +36,52 @@ namespace ore
         TILESET_COLLISION,
         ZLIB_ERROR
     };
+
+    /**
+     * Resource types available.
+     */
+    enum RESOURCE_TYPE
+    {
+        MAP_TYPE,
+        TILESET_TYPE,
+        LAYER_TYPE,
+        IMAGE_TYPE,
+        OBJECT_TYPE
+    };
+
+    enum PROP_TYPE
+    {
+        INT_PROP,
+        FLOAT_PROP,
+        STRING_PROP,
+        RAW_DATA_PROP,
+        UNKNOWN_PROP
+    };
+
+    enum ORIENTATION
+    {
+        NORTH = 0x000001,
+        EAST =  0x000002,
+        SOUTH = 0x000004,
+        WEST =  0x000008
+    };
+
+    //Structs
+    struct Property
+    {
+        PROP_TYPE type;
+        union data
+        {
+            float f;
+            int i;
+            std::string str;
+            std::vector<ore::uint8> raw;
+        };
+    };
+
+    //TODO Colocar num arquivo separado
+    //TODO Compress()
+    int Uncompress(const std::vector<ore::uint8>& data, std::vector<ore::uint8>& result,
+                   ore::uint32 expectedSize);
 }
 #endif // UTILS_HPP

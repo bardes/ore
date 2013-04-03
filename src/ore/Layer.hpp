@@ -1,6 +1,8 @@
 #ifndef LAYER_HPP
 #define LAYER_HPP
 
+#include "Resource.hpp"
+#include "Tileset.hpp"
 #include "Utils.hpp"
 
 #include <SFML/Graphics.hpp>
@@ -10,15 +12,18 @@
 
 namespace ore
 {
-    class Layer
+    class Layer : public Resource
     {
     public:
+        //TODO Default constructor
+        //Funções de acesso.
 
-        Layer(ore::uint8 w, ore::uint8 h, const std::string &name);
+        Layer(ore::uint8 w, ore::uint8 h, uint8 tw, uint8 th, const std::string &name);
 
-        ore::uint16& operator[](ore::uint16 index);
-
-        const ore::uint16& operator[](ore::uint16 index) const;
+        virtual ore::RESOURCE_TYPE GetType() const
+        {
+            return ore::LAYER_TYPE;
+        }
 
         /**
          * Resets all data to default.
@@ -26,7 +31,18 @@ namespace ore
         void Clear();
 
         /**
-         * Gets the height of the map in tiles.
+         * @brief Renders this layer and stores the result in cache.
+         * @return The rendered image.
+         */
+        sf::Sprite RenderCache(const std::vector<Tileset*>& tilesets);
+
+        sf::Sprite GetImage() const
+        {
+            return sf::Sprite(mCache.getTexture());
+        }
+
+        /**
+         * Gets the height of the layer in tiles.
          */
         ore::uint8 GetHeight() const
         {
@@ -34,7 +50,7 @@ namespace ore
         }
 
         /**
-         * Gets the width of the map in tiles.
+         * Gets the width of the layer in tiles.
          */
         ore::uint8 GetWidth() const
         {
@@ -55,6 +71,9 @@ namespace ore
          */
         ore::uint16 GetGid(ore::uint8 xPos, ore::uint8 yPos) const
         {
+            if((yPos * mWidth) + xPos >= mGids.size())
+                return 0;
+
             return mGids[(yPos * mWidth) + xPos];
         }
 
@@ -64,8 +83,27 @@ namespace ore
          */
         ore::uint16 GetGid(ore::uint16 index) const
         {
+            if(index >= mGids.size())
+                return 0;
+
             return mGids[index];
         }
+
+        void AddGid(ore::uint16 gid)
+        {
+            mGids.push_back(gid);
+        }
+
+        ore::uint8 GetTileWidth() const
+        {
+            return mTileWidth;
+        }
+
+        ore::uint8 GetTileHeight() const
+        {
+            return mTileHeight;
+        }
+        //TODO SetData();
 
     private:
         /**
@@ -79,6 +117,16 @@ namespace ore
         ore::uint8 mHeight;
 
         /**
+         * Width of the "regular" tiles.
+         */
+        ore::uint8 mTileWidth;
+
+        /**
+         * Hight of the "regular" tiles.
+         */
+        ore::uint8 mTileHeight;
+
+        /**
          * Name of the layer.
          */
         std::string mName;
@@ -87,6 +135,11 @@ namespace ore
          * This holds the GIDs of this layer.
          */
         std::vector<ore::uint16> mGids;
+
+        /**
+         * Cached renderd image of this layer.
+         */
+        sf::RenderTexture mCache;
     };
 }
 #endif // LAYER_HPP

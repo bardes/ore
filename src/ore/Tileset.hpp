@@ -1,6 +1,9 @@
 #ifndef TILESET_HPP
 #define TILESET_HPP
 
+#include "Image.hpp"
+#include "Resource.hpp"
+#include "ResourceManager.hpp"
 #include "Utils.hpp"
 
 #include <SFML/Graphics.hpp>
@@ -11,7 +14,7 @@
 
 namespace ore
 {
-    class Tileset
+    class Tileset : public Resource
     {
     public:
         /**
@@ -19,29 +22,32 @@ namespace ore
          */
         Tileset();
 
-        //TODO Other kinds of constructors
-
-        //~Tileset();
+        /**
+         * @brief Gets the type of the resource;
+         */
+        virtual ore::RESOURCE_TYPE GetType() const
+        {
+            return ore::TILESET_TYPE;
+        }
 
         /**
          * This function loads the tileset from a source image. If it fails to
-         * load the image an exception is thrown, and all the data is reset to
-         * the defaults.
-         *
+         * load the image the tileset is left cleard.
          * @param path relative or absolute path to the image file.
          * @param fGid the first gid of this tileset.
          * @param tileWidth width of the tiles in pixels.
          * @param tileHeight height of the tiles in pixels.
+         * @param mgr Resource manager to keep track of the tileset image.
+         * @return Returns true if failed to load.
          */
-        void Load(const std::string &path, ore::uint16 fGid,
-                               ore::uint8 tileWidth, ore::uint8 tileHeight);
+        bool Load(const std::string &path, ore::uint16 fGid, ore::uint8 tileWidth,
+                  ore::uint8 tileHeight, ore::ResourceManager *mgr = NULL);
 
         /**
-         * This function reloads the tileset using mPath as the source image.
-         * If mPath is not set or it fails to load the image an exception is
-         * thrown, and all the data is reset to defaults.
+         * This function reloads the tileset, leaving it unchanged in case of failure.
+         * @return Returns true if it fails to load the image.
          */
-        void Reload();
+        bool Reload();
 
         /**
          * Checks if the given GID is part of this tileset.
@@ -49,7 +55,10 @@ namespace ore
          * @param gid Global ID of the tile you want to check.
          * @return true if is or false if it is not.
          */
-        bool IsMyGid(ore::uint16 gid);
+        bool IsMyGid(ore::uint16 gid)
+        {
+            return (gid >= mFirstGid) && (gid <= mLastGid);
+        }
 
         /**
          * Gets the path of the image.
@@ -64,7 +73,7 @@ namespace ore
          */
         const sf::Texture& GetTexture() const
         {
-            return mTexture;
+            return mImage->GetTexture();
         }
 
         /**
@@ -82,7 +91,7 @@ namespace ore
          */
         ore::uint16 GetLastGid()
         {
-            return mHeight * mWidth + mFirstGid - 1;
+            return (mHeight * mWidth) + mFirstGid - 1;
         }
 
         /**
@@ -109,7 +118,7 @@ namespace ore
          */
         ore::uint32 GetHeightP()
         {
-            return mTexture.getSize().y;
+            return mImage->GetTexture().getSize().y;
         }
 
         /**
@@ -118,8 +127,12 @@ namespace ore
          */
         ore::uint32 GetWidthP()
         {
-            return mTexture.getSize().x;
+            return mImage->GetTexture().getSize().x;
         }
+
+        sf::Sprite GetGidImg(ore::uint16 gid);
+
+        void Clear();
 
     private:
         /**
@@ -156,12 +169,14 @@ namespace ore
         /**
          * This holds the tiles image.
          */
-        sf::Texture mTexture;
+        ore::Image* mImage;
 
         /**
          * The path to the image file.
          */
         std::string mPath;
+
+        ResourceManager mLocalMgr;
     };
 }
 #endif // TILESET_HPP

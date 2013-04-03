@@ -1,8 +1,9 @@
 #include "Map.hpp"
 
 #include "Base64.hpp"
-#include "Utils.hpp"
 #include "Layer.hpp"
+#include "Tileset.hpp"
+#include "Utils.hpp"
 
 #include "../tinyXml/tinyxml.h"
 
@@ -14,7 +15,7 @@
 #include <sys/types.h>
 
 ore::Map::Map() : mFilePath(""), mWidth(0), mHeight(0), mTileWidth(0),
-mTileHeight(0), mPlayerLayer(0), mCached(false)
+mTileHeight(0)
 {
     //Reserving some space to avoid reallocations
     mLayers.reserve(32);
@@ -23,29 +24,19 @@ mTileHeight(0), mPlayerLayer(0), mCached(false)
 
 ore::Map::~Map()
 {
-    for(int i = 0; i < mLayers.size(); ++i)
-        delete mLayers[i];
-
-    for(int i = 0; i < mTilesets.size(); ++i)
-        delete mTilesets[i];
+    //Don't panic!
+    //The layers and tilesets will be deleted by the resource manager
 }
 
 void ore::Map::Clear()
 {
-    mWidth = mHeight = mTileWidth = mTileHeight = mPlayerLayer = 0;
+    mWidth = mHeight = mTileWidth = mTileHeight = 0;
     mFilePath.clear();
-    mLayerCacheBotom.clear();
-    mLayerCacheTop.clear();
-    mCached = false;
-
-    for(int i = 0; i < mLayers.size(); ++i)
-        delete mLayers[i];
-
-    for(int i = 0; i < mTilesets.size(); ++i)
-        delete mTilesets[i];
+    mTilesets.clear();
+    mLayers.clear();
+    mLocalMgr.Clear();
 }
 
-//TODO Make sure Load() does not mem leak if called twice or more
 void ore::Map::Load(const std::string &file)
 {
     //Clearing any old data
@@ -84,10 +75,10 @@ void ore::Map::Load(const std::string &file)
     mTileHeight = TileHeight;
     mFilePath = file;
 
-    //Used to iterate through some xml elements later
+    //Used to iterate through some xml elements...
     TiXmlElement *element;
 
-    //Loading the tileset
+    //Looking for the tileset
     if((element = xmlFile.RootElement()->FirstChildElement("tileset")) == NULL)
     {
         std::cerr << "Error: Could not find any tileset on this map: "
@@ -99,15 +90,35 @@ void ore::Map::Load(const std::string &file)
     for(; element; element = element->NextSiblingElement("tileset"))
     {
         //Temporary data
-        Tileset *tileset;
+        ore::Tileset *tileset;
         int firstGid = 0;
-        std::string path;
+        int tw, th;
+        tw = th = 0;
+        std::string path = file;
+
+        //Removing the file name
+        while((*path.rbegin()) != '/' && path.end() != path.begin())
+            path.resize(path.size() - 1);
 
         //Reading the first gid
         element->Attribute("firstgid", &firstGid);
         if(firstGid == 0)
         {
             std::cerr<<"Error: Invalid first GID. (not found or equals to 0)\n";
+            throw ore::INVALID_TILESET;
+        }
+
+        //Reading tile width and height
+        element->Attribute("tilewidth", &tw);
+        if(firstGid == 0)
+        {
+            std:: cerr << "Error: Can't read tile widht. (not found or equals to 0)\n";
+            throw ore::INVALID_TILESET;
+        }
+        element->Attribute("tileheight", &th);
+        if(firstGid == 0)
+        {
+            std:: cerr << "Error: Can't read tile height. (not found or equals to 0)\n";
             throw ore::INVALID_TILESET;
         }
 
@@ -126,11 +137,10 @@ void ore::Map::Load(const std::string &file)
         }
         else
         {
-            path = element->FirstChildElement("image")->Attribute("source");
+            path.append(element->FirstChildElement("image")->Attribute("source"));
         }
 
-        //Adding it
-        AddTileset(path, firstGid, mTileWidth, mTileHeight);
+        AddTileset(path, firstGid, tw, th);
 
     }
 
@@ -149,8 +159,7 @@ void ore::Map::Load(const std::string &file)
         if(element->Attribute("name"))
             name = element->Attribute("name");
 
-        //Checking if there is a <data> tag, and if it's using the correct
-        //compression method (zilb)
+        //Checking if there is a <data>
         if(!element->FirstChildElement("data"))
         {
             std::cerr << "Error: Could not find <data> tag of " << name
@@ -165,35 +174,52 @@ void ore::Map::Load(const std::string &file)
         }
         else if(!element->FirstChildElement("data")->Attribute("compression"))
         {
-            std::cerr << "Error: Could not identificate any compression method "
+            std::cerr << "Error: Could not identify any compression method "
             "on this map: " << file << "\n";
             throw ore::INVALID_COMPRESSION_METHOD;
         }
-        else if(strcmp(element->FirstChildElement("data")->
-                       Attribute("compression"), "zlib"))
+        else if(strcmp(element->FirstChildElement("data")->Attribute("compression"), "zlib") &&
+                strcmp(element->FirstChildElement("data")->Attribute("compression"), "gzip"))
         {
-            std::cerr << "Error: This map is not using zlib compression: "
+            std::cerr << "Error: This map is not using a valid compression method: "
             << file << "\n";
             throw ore::INVALID_COMPRESSION_METHOD;
         }
 
         std::string data = element->FirstChildElement("data")->GetText();
-        AddLayer(data, mWidth, mHeight, name);
-
-        //Go to the next layer in the file and iterate
+        AddLayer(data, name);
         element = element->NextSiblingElement("layer");
     }
 
-    //TODO Pre-render the layers
+    RenderCache();
 }
 
-void ore::Map::AddTileset(std::string& path, ore::uint16 fGid,
-                                       ore::uint8 tw, ore::uint8 th)
+void ore::Map::RenderCache()
+{
+    if(mLayers.size() == 0)
+        return;
+
+    for(int i = 0; i < mLayers.size(); ++i)
+        mLayers[i]->RenderCache(mTilesets);
+}
+
+sf::Sprite ore::Map::GetLayerImg(ore::uint16 layer)
+{
+    if(layer >= mLayers.size())
+    {
+        std::cerr << "Warning: Layer out of range!\n";
+        return sf::Sprite();
+    }
+
+    return mLayers[layer]->GetImage();
+}
+
+void ore::Map::AddTileset(Tileset *newTileset, bool reg)
 {
     //Checking if the new tileset doesn't conflicts with the old ones
     for(int i = 0; i < mTilesets.size(); ++i)
     {
-        if(mTilesets[i]->IsMyGid(fGid))
+        if(mTilesets[i]->IsMyGid(newTileset->GetFirstGid()))
         {
             std::cerr <<"Error: GID conflict! (Same GID found in different "
             "tilesets).\n";
@@ -201,11 +227,31 @@ void ore::Map::AddTileset(std::string& path, ore::uint16 fGid,
         }
     }
 
-    Tileset *loaded;
+    newTileset->AddUser(this);
+    mTilesets.push_back(newTileset);
+    if(reg)
+        mLocalMgr.Register(newTileset);
+}
+
+ore::Tileset* ore::Map::AddTileset(const std::string &path, ore::uint16 fGid,
+                                       ore::uint8 tw, ore::uint8 th, ResourceManager* mgr)
+{
+    //Checking if the new tileset doesn't conflicts with the old ones
+    for(int i = 0; i < mTilesets.size(); ++i)
+    {
+        if(mTilesets[i]->IsMyGid(fGid))
+        {
+            std::cerr <<"Error: GID conflict! (Same GID found in different "
+                        "tilesets).\n" << "path: " << path << "\n";
+            throw ore::TILESET_COLLISION;
+        }
+    }
+
+    ore::Tileset *loaded;
 
     try
     {
-        loaded = new Tileset;
+        loaded = new ore::Tileset;
         loaded->Load(path, fGid, tw, th);
     }
     catch(ore::EXCEPTION exc)
@@ -219,12 +265,38 @@ void ore::Map::AddTileset(std::string& path, ore::uint16 fGid,
         throw ore::BAD_ALLOC;
     }
 
+    loaded->AddUser(this);
     mTilesets.push_back(loaded);
+
+    if(mgr == NULL)
+        mLocalMgr.Register(loaded);
+    else
+        mgr->Register(loaded);
+
+    return loaded;
 }
 
-void ore::Map::AddLayer(const std::string &data, ore::uint8 width,
-                        ore::uint8 height, const std::string &name)
+bool ore::Map::DeleteTileset(Tileset* tileset)
 {
+    for(int i = 0; i < mTilesets.size(); ++i)
+    {
+        if(mTilesets[i] == tileset)
+        {
+            mTilesets[i]->DeleteUser(this);
+            mTilesets.erase(mTilesets.begin() + i);
+            return false;
+        }
+    }
+    return true;
+}
+
+//TODO Load uncompressed data too
+ore::Layer* ore::Map::AddLayer(const std::string &data, const std::string &name, int pos)
+{
+    //Chacking if the map has the necessary data.
+    if(!(mWidth && mHeight && mTileWidth && mTileHeight))
+        return NULL;
+
     //Decoding the base64 string
     std::vector<ore::uint8> decoded;
     base64decode(data, decoded);
@@ -236,34 +308,20 @@ void ore::Map::AddLayer(const std::string &data, ore::uint8 width,
         throw ore::INVALID_MAP_DATA;
     }
 
-    //Now it's time to uncompress it. The expected size of the uncompressed
-    //data is 4 times the number of tiles in the map. (one int per tile)
-    uLongf expectedSize = 4 * width * height;
-    ore::uint8 uncompressed[expectedSize];
-    int err;
-    if((err = uncompress(uncompressed, &expectedSize, decoded.data(),
-        decoded.size())) < 0)
+    //Now it's time to uncompress it.
+    std::vector<ore::uint8> uncompressed;
+    if(ore::Uncompress(decoded, uncompressed, 4 * mWidth * mHeight))
     {
         std::cerr << "Error: Corrupt data in " << name << " of this map: "
-        << mFilePath << "\n(Zlib error code: " << err << ")\n";
-        throw ore::ZLIB_ERROR;
-    }
-
-    //Zlib will change expectedSize if only part of the data is uncompressed
-    //If expectedSize is no longer the same, something went wrong...
-    if(expectedSize != 4 * width * height)
-    {
-        std::cerr << "Error: Corrupt data in " << name << " of this map:"
         << mFilePath << ".\n";
         throw ore::INVALID_MAP_DATA;
     }
 
     //Creating the new layer
     Layer *loaded;
-
     try
     {
-    loaded = new Layer(width, height, name);
+        loaded = new Layer(mWidth, mHeight, mTileWidth, mTileHeight, name);
     }
     catch(std::bad_alloc&)
     {
@@ -272,11 +330,33 @@ void ore::Map::AddLayer(const std::string &data, ore::uint8 width,
     }
 
     //Converting the data (into ints) and copying it to the layer
-    for(int k = 0; k < expectedSize; k += 4)
+    for(int k = 0; k < uncompressed.size(); k += 4)
     {
-        (*loaded)[k / 4] = uncompressed[k] | (uncompressed[k + 1] << 8) |
-        (uncompressed[k + 2] << 16) | uncompressed[k + 3] << 24;
+        loaded->AddGid(uncompressed[k] | (uncompressed[k + 1] << 8) |
+        (uncompressed[k + 2] << 16) | uncompressed[k + 3] << 24);
     }
 
-    mLayers.push_back(loaded);
+    loaded->AddUser(this);
+    mLocalMgr.Register(loaded);
+
+    if(pos < 0 || pos >= mLayers.size())
+        mLayers.push_back(loaded);
+    else
+        mLayers.insert(mLayers.begin() + pos, loaded);
+
+    return loaded;
+}
+
+void ore::Map::AddLayer(Layer *newLayer, int pos)
+{
+    if(mLayers.size() >= Max_Layers)
+        return;
+
+    newLayer->AddUser(this);
+    mLocalMgr.Register(newLayer);
+
+    if(pos < 0 || pos >= mLayers.size())
+        mLayers.push_back(newLayer);
+    else
+        mLayers.insert(mLayers.begin() + pos, newLayer);
 }

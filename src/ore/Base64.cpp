@@ -18,7 +18,7 @@ void ore::base64decode(const std::string &encodedString,
                            'n','o','p','q','r','s','t','u','v','w','x','y','z',
                            '0','1','2','3','4','5','6','7','8','9','+','/'};
 
-    //Is it a valid string
+    //Is it a valid string?
     if(encodedString.length() < 4)
         return;
 
@@ -27,9 +27,9 @@ void ore::base64decode(const std::string &encodedString,
     while(encodedString[len] != '=' && len < encodedString.length())
         ++len;
 
-    //This block gets the 6-bit integer value of the base64 string
+    //This block gets the 6-bit integer value of each character of the string
     unsigned char values[len];
-    unsigned int i; //General iterator
+    unsigned int i;
     for (i = 0; i < len; i++)
     {
         unsigned char j = 0;

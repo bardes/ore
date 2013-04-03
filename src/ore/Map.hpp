@@ -1,8 +1,8 @@
 #ifndef MAP_HPP
 #define MAP_HPP
 
-#include "Layer.hpp"
-#include "Tileset.hpp"
+#include "Resource.hpp"
+#include "ResourceManager.hpp"
 #include "Utils.hpp"
 
 #include <string>
@@ -14,53 +14,114 @@ namespace ore
 {
     const unsigned int Max_Layers = 256;
 
-    class Map
+    class Layer;
+    class Tileset;
+
+    class Map : public Resource
     {
     public:
 
+        //TODO GetTilesets(), DeleteLayer, MoveLayer, GetLayerData
+        //TODO mName
         Map();
 
-        ~Map();
+        virtual ~Map();
 
         /**
-         * This function loads a map from a .tmx file.
+         * @brief Gets the type of the resource;
          */
-        void Load(const std::string &file);
+        virtual ore::RESOURCE_TYPE GetType() const
+        {
+            return ore::MAP_TYPE;
+        }
 
         /**
-         * This functions adds a tileset to the map.
+         * @brief This function loads a map from a .tmx file.
+         */
+        void Load(const std::string &file);   
+
+        /**
+         * @brief Renders the cache of all layers.
+         */
+        void RenderCache();
+
+        /**
+         * @brief Loads a new tileset and adds it to the map.
          * @param path Path to the tileset image.
          * @param fGid first GID of the tileset.
          * @param tw width of each tile (in pixels).
          * @param th height of each tile (in pixels).
+         * @return The addres of the new tileset.
          */
-        void AddTileset(std::string &path, ore::uint16 fGid,
-                                     ore::uint8 tw, ore::uint8 th);
-
-        /***
-         * This function deletes a tileset from this map. The first gid of the
-         * tileset is used to idntify which tileset will be deleted.
-         * @return false if can't find or delete the tileset.
-         */
-        //TODO bool DeleteTileset(sf::uint16 firstGid)
+        ore::Tileset* AddTileset(const std::string &path, ore::uint16 fGid,
+                                 ore::uint8 tw, ore::uint8 th,
+                                 ResourceManager* mgr = NULL);
 
         /**
-         * This function adds a layer on top of the others.
+         * @brief Adds the given tileset to the map.
+         * @param newTileset address of the tileset.
+         */
+        void AddTileset(Tileset* newTileset, bool reg);
+
+        /**
+         * @brief Deletes a tileset from this map.
+         * @param tileset Address of the tileset to be deleted.
+         * @return True if can't find the tileset.
+         */
+        bool DeleteTileset(Tileset* tileset);
+
+        sf::Sprite GetTilesetImg(ore::uint8)
+        {
+            return sf::Sprite();
+        }
+
+        /**
+         * @brief This function adds a new layer to the map.
+         * By default it goes on top of the others, but this can be changed by
+         * setting the pos value. Note that layers are always registerd on the
+         * local resource manager.
          * @param data This should be the uncompressed data from a .tmx file.
          * @param width Width of the layer in tiles.
          * @param height Height of the layer in tiles.
+         * @param name Name of the layer.
+         * @param pos Position of the layer (0 is bottom). If pos is too big or
+         * smaller than 0 the layer goes to the top.
          */
-        void AddLayer(const std::string &data, ore::uint8 width,
-                      ore::uint8 height, const std::string &name);
+        ore::Layer* AddLayer(const std::string &data, const std::string &name, int pos = -1);
 
         /**
-         * Clears all data from the map. It does delete the layers and tilesets
-         * also.
+         * @brief This function adds a layer to the map.
+         * By default it goes on top of the others, but this can be changed by
+         * setting the pos value. Note that layers are always registerd on the
+         * local resource manager.
+         * @param newLayer address of the layer to be added.
+         * @param pos Position of the layer (0 is bottom). If pos is too big or
+         * smaller than 0 the layer goes to the top.
+         */
+        void AddLayer(Layer* newLayer, int pos = -1);
+
+        /**
+         * @brief Gets the image of a layer.
+         * @param layer Number of the layer. (0 is the bottom most layer)
+         * @return A sprite with the image.
+         */
+        sf::Sprite GetLayerImg(ore::uint16 layer);
+
+        /**
+         * @brief Gets number of layers of this map.
+         */
+        ore::uint8 GetLayersN() const
+        {
+            return mLayers.size();
+        }
+
+        /**
+         * @brief Clears all data from the map.
          */
         void Clear();
 
         /**
-         * Gets the height of the map in tiles.
+         * @brief Gets the height of the map in tiles.
          */
         ore::uint8 GetHeight() const
         {
@@ -68,7 +129,7 @@ namespace ore
         }
 
         /**
-         * Gets the width of the map in tiles.
+         * @brief Gets the width of the map in tiles.
          */
         ore::uint8 GetWidth() const
         {
@@ -76,7 +137,7 @@ namespace ore
         }
 
         /**
-         * Gets the height of the tiles (in pixels of course).
+         * @brief Gets the height of the tiles (in pixels of course).
          */
         ore::uint8 GetTileHeight() const
         {
@@ -84,83 +145,53 @@ namespace ore
         }
 
         /**
-         * Gets the width of the tiles (in pixels of course).
+         * @brief Gets the width of the tiles (in pixels of course).
          */
         ore::uint8 GetTileWidth() const
         {
             return mTileWidth;
         }
 
-        /**
-         * Sets the layer in which the player should be drawn on this map.
-         */
-        void SetPlayerLayer(ore::uint8 layer)
-        {
-            if(layer <= mLayers.size())
-                mPlayerLayer = layer;
-        }
-
-        // Just for tests (remove later)
-        ore::uint8 GetLayers() const
-        {
-            return mLayers.size();
-        }
-
     private:
         /**
-         * Path to the .tmx file.
+         * @brief Path to the .tmx file.
          */
         std::string mFilePath;
 
         /**
-         * Width of the map (in tiles).
+         * @brief Width of the map (in tiles).
          */
         ore::uint8 mWidth;
 
         /**
-         * Height of the map (in tiles).
+         * @brief Height of the map (in tiles).
          */
         ore::uint8 mHeight;
 
         /**
-         * Width of the tiles.
+         * @brief Width of the tiles.
          */
         ore::uint8 mTileWidth;
 
         /**
-         * Height of the tiles.
+         * @brief Height of the tiles.
          */
         ore::uint8 mTileHeight;
 
         /**
-         * The layer in which the player will be drawn over
-         */
-        ore::uint8 mPlayerLayer;
-
-        /**
-         * Flag to indicate whether the cache needs to be updated or not.
-         */
-        bool mCached;
-
-        /**
-         * A vector of pointers to the tilesets of this map.
+         * @brief A vector of pointers to the tilesets of this map.
          */
         std::vector<Tileset*> mTilesets;
 
         /**
-         * A vector of pointers to the layers of this map.
+         * @brief A vector of pointers to the layers of this map.
          */
         std::vector<Layer*> mLayers;
 
         /**
-         * This holds a pre-rendered image of all bottom layers (under the player)
+         * @brief Default local resource manager.
          */
-        sf::RenderTexture mLayerCacheBotom;
-
-        /**
-         * This holds a pre-rendered image of all top layers (above the player)
-         */
-        sf::RenderTexture mLayerCacheTop;
+        ResourceManager mLocalMgr;
     };
 }
 #endif // MAP_HPP
