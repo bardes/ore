@@ -22,8 +22,6 @@ namespace ore
         
         /**
          * @brief Registers a new resource to this manager.
-         * The usr option is a convenience to join the AddUser() and Register()
-         * functions, since usually they are used together.
          * @param res Resource to be monitored by this manager.
          * @param usr The user of this resource. If set to NULL wil be ignored.
          */
@@ -31,6 +29,7 @@ namespace ore
 
         /**
          * @brief Unregisters a resource without deleting it.
+         * 
          * This function simply makes the the manager forget about this
          * resource. It doesn't erase anything.
          * @param res Resource to be unregistered.
@@ -40,6 +39,7 @@ namespace ore
 
         /**
          * @brief Unregisters a resource _without_ deleting it.
+         * 
          * This function simply makes the the manager forget about this
          * resource. It doesn't erase anything.
          * @param id Id of the resource to be unregistered.
@@ -49,6 +49,7 @@ namespace ore
 
         /**
          * @brief Deletes the resource from the manager and erases it's content.
+         * 
          * This function attempts to delete a resource but by default will stop if
          * there are still others using it. The force flag may be used to overide
          * this behavior.
@@ -61,6 +62,7 @@ namespace ore
 
         /**
          * @brief Deletes the resource from the manager and erases it's content.
+         * 
          * This function attempts to delete a resource but by default will stop if
          * there are still others using it. The force flag may be used to overide
          * this behavior.
@@ -94,8 +96,8 @@ namespace ore
          * @param id Id of the resource.
          * @return The address of the resource or NULL if not found.
          */
-        const Resource* GetResource(const std::string &id) const;
         Resource* GetResource(const std::string &id);
+        const Resource* GetResource(const std::string &id) const;
 
     private:
 

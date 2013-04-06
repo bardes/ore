@@ -32,7 +32,7 @@ bool ore::Tileset::Load (const std::string& path, ore::uint16 fGid, ore::uint8
     Clear();
 
     if(path.empty() || !(tileHeight && tileWidth && fGid))
-        return true;
+        return false;
 
     mImage = new Image();
     if(!mImage->GetTexture().loadFromFile(path))
@@ -40,7 +40,7 @@ bool ore::Tileset::Load (const std::string& path, ore::uint16 fGid, ore::uint8
         std::cerr << "Warning: Failed to load image: " << path << "\n";
         delete mImage;
         mImage = NULL;
-        return true;
+        return false;
     }
 
     mImage->AddUser(this);
@@ -59,6 +59,7 @@ bool ore::Tileset::Load (const std::string& path, ore::uint16 fGid, ore::uint8
     mWidth = mImage->GetTexture().getSize().x / tileWidth;
     mFirstGid = fGid;
     mLastGid = GetLastGid();
+    return true;
 }
 
 sf::Sprite ore::Tileset::GetGidImg(ore::uint16 gid)
@@ -78,11 +79,19 @@ sf::Sprite ore::Tileset::GetGidImg(ore::uint16 gid)
 bool ore::Tileset::Reload()
 {
     if(mPath.empty())
-        return true;
+        return false;
 
     sf::Image tmp;
     if(!tmp.loadFromFile(mPath))
-        return true;
+        return false;
 
     mImage->GetTexture().update(tmp);
+    return true;
 }
+
+ore::Tileset::~Tileset()
+{
+    if(mImage)
+        mImage->DeleteUser(this);
+}
+

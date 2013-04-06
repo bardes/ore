@@ -26,6 +26,11 @@ ore::Map::~Map()
 {
     //Don't panic!
     //The layers and tilesets will be deleted by the resource manager
+    for(int i = 0; i < mTilesets.size(); ++i)
+        mTilesets[i]->DeleteUser(this);
+    
+    for(int i = 0; i < mLayers.size(); ++i)
+        mLayers[i]->DeleteUser(this);
 }
 
 void ore::Map::Clear()

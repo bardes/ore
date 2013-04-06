@@ -10,10 +10,9 @@
 #include <string>
 #include <vector>
 
-#include <boost/variant.hpp>
-
 #include <SFML/Graphics.hpp>
 
+//TODO change all functions thar return false on success to true;
 namespace ore
 {
     class Object : public Resource
@@ -23,9 +22,9 @@ namespace ore
         Object();
         virtual ~Object();
 
-        virtual ore::RESOURCE_TYPE GetType() const
+        virtual RESOURCE_TYPE GetType() const
         {
-            return ore::OBJECT_TYPE;
+            return OBJECT_TYPE;
         }
 
         ore::uint8 GetLayer() const
@@ -33,89 +32,190 @@ namespace ore
             return mLayer;
         }
         
-//         static ore::Property CreateProp(int n);
-//         
-//         static ore::Property CreateProp(float n);
-//         
-//         static ore::Property CreateProp(std::string &str);
-//         
-//         static ore::Property CreateProp(std::vector<ore::uint8> &raw);
-        
-        void AddProp(std::string& key, int n)
+        /**
+         * @brief Checks if an object has the property specified by the given \a key.
+         * 
+         * Note that this function doesn't perform any aditional checking, so 
+         * even "UNKNOWN_TYPE" and uninitialized properties return true.
+         * @param key Key to be checked.
+         * @return true if the key is found.
+         */
+        bool HasProp(const std::string &key)
         {
-            mProps[key] = n;
+            return mProps.count(key);
         }
         
-        void AddProp(std::string& key, float n)
-        {
-            mProps[key] = n;
-        }
+        /**
+         * @brief Sets up an integer property.
+         * 
+         * This function changes the value of an exiting property or creates one
+         * if none is found. Note that this functions also changes the property
+         * type, so it's ok to set different types to the same prop.
+         * @param key String that identifies the property. (A.K.A. key)
+         * @param n Value of the property.
+         */
+        void SetProp(const std::string& key, int n);
         
-        void AddProp(std::string& key, std::string &str)
-        {
-            mProps[key] = str;
-        }
+        /**
+         * @brief Sets up a float property.
+         * 
+         * This function changes the value of an exiting property or creates one
+         * if none is found.
+         * __ATENTION__: If you want a float prop don't forget to append the "f"
+         * suffix to the number. Otherwise it may be ambiguous to the compiler.
+         * @param key String that identifies the property. (A.K.A. key)
+         * @param n Value of the property.
+         */
+        void SetProp(const std::string& key, float n);
         
-        void AddProp(std::string& key, std::vector<ore::uint8> raw)
-        {
-            mProps[key] = raw;
-        }
-
-        std::string& GetPropStr(std::string& key);
-
-        int& GetPropInt(std::string& key);
-
-        float& GetPropFloat(std::string& key);
-
-        std::vector<ore::uint8>& GetPropRawData(std::string& key);
-
-        Property GetProp(std::string& key)
-        {
-            if(!mProps.count(key))
-            {
-                Property ret;
-                ret.data = NULL;
-                ret.type = UNKNOWN_PROP;
-                return ret;
-            }
-
-            return mProps[key];
-        }
+        /**
+         * @brief Sets up a string property.
+         * 
+         * This function changes the value of an exiting property or creates one
+         * if none is found. Note that this functions also changes the property
+         * type, so it's ok to set different types to the same prop.
+         * @param key String that identifies the property. (A.K.A. key)
+         * @param str Value of the property.
+         */
+        void SetProp(const std::string& key, const std::string& str);
         
-        bool DeleteProp(std::string &key);
+        /**
+         * @brief Sets up a raw property.
+         * 
+         * This function changes the value of an exiting property or creates one
+         * if none is found. Note that this functions also changes the property
+         * type, so it's ok to set different types to the same prop.
+         * Side note: A raw property is just a vector of ore::uint8 (bytes basicaly).
+         * @param key String that identifies the property. (A.K.A. key)
+         * @param raw Value of the property.
+         */
+        void SetProp(const std::string& key, const std::vector<ore::uint8>& raw);
+        
+        /**
+         * @brief Gets a reference to the prop defined by \a key.
+         * 
+         * If there's no property defined by \a key, one is created with type
+         * \a ore::NEW_PROP and returned.\n
+         * _CAUTION_: There is no type checking when accessing the property data
+         * through this function.
+         * @param key Key of the desired value.
+         */
+        Property& GetProp(const std::string& key);
 
+        /**
+         * @brief Gets a reference to an integer prop.
+         * 
+         * If \a key doesn't exist already a new prop is created.\n
+         * Note tha this function DOES perform a type check using the value of
+         * "prop.type", and thus may trhow an exeption if it's not an integer.
+         * @param key Key of the desired value.
+         */
+        int& GetPropInt(const std::string& key);
+
+        /**
+         * @brief Gets a reference to a float prop.
+         * 
+         * If \a key doesn't exist already a new prop is created.\n
+         * Note tha this function DOES perform a type check using the value of
+         * "prop.type", and thus may trhow an exeption if it's not a float.
+         * @param key Key of the desired value.
+         */
+        float& GetPropFloat(const std::string& key);
+
+        /**
+         * @brief Gets a reference to a string prop.
+         * 
+         * If \a key doesn't exist already a new prop is created.\n
+         * Note tha this function DOES perform a type check using the value of
+         * "prop.type", and thus may trhow an exeption if it's not a string.
+         * @param key Key of the desired value.
+         */
+        std::string& GetPropStr(const std::string& key);
+
+        /**
+         * @brief Gets a reference to a "raw data" prop.
+         * 
+         * If \a key doesn't exist already a new prop is created.\n
+         * Note tha this function DOES perform a type check using the value of
+         * "prop.type", and thus may trhow an exeption if it's not "raw data".
+         * @param key Key of the desired value.
+         */
+        std::vector< ore::uint8 >& GetPropRawData(const std::string& key);
+
+        /**
+         * @brief Deletes the given prop and erases any content allocated by it.
+         * 
+         * If the prop doesn't exist nothing is done.
+         * @param key Key of the desired value.
+         */
+        void DeleteProp(const std::string& key);
+
+        /**
+         * @brief Sets the object't current layer.
+         */
         void SetLayer(ore::uint8 l)
         {
             mLayer = l;
         }
 
+        /**
+         * @brief Sets the current position of the object.
+         */
         void SetPos(sf::Vector2i p)
         {
-            //mPos = p;
             mSprite.setPosition(p.x, p.y);
         }
 
+        /**
+         * @brief Sets the current position of the object.
+         */
         void SetPos(ore::int32 x, ore::int32 y)
         {
             mSprite.setPosition(x, y);
         }
 
+        /**
+         * @brief Sets the width of the object.
+         * 
+         * Note: this is only used for drawing the object. Collision detection is
+         * performed using a collision box.
+         */
         void SetWidth(ore::uint32 w)
         {
             mSize.x = mCrop.width = w;
         }
 
+        /**
+         * @brief Sets the height of the object.
+         * 
+         * Note: this is only used for drawing the object. Collision detection is
+         * performed using a collision box.
+         */
         void SetHeight(ore::uint32 h)
         {
             mSize.y = mCrop.height = h;
         }
 
+        /**
+         * @brief Sets the size of the object. (same as obj.SetWidth(w) and 
+         * obj.SetHeight(h))
+         * 
+         * Note: this is only used for drawing the object. Collision detection is
+         * performed using a collision box.
+         */
         void SetSize(ore::uint32 w, ore::uint32 h)
         {
             mSize.x = mCrop.width = w;
             mSize.y = mCrop.height = h;
         }
 
+        /**
+         * @brief Sets the size of the object. (same as obj.SetWidth(w) and 
+         * obj.SetHeight(h))
+         * 
+         * Note: this is only used for drawing the object. Collision detection is
+         * performed using a collision box.
+         */
         void SetSize(sf::Vector2i size)
         {
             mSize = size;
@@ -178,12 +278,17 @@ namespace ore
         {
             return mOrigin;
         }
-
-        ore::Property Prop(const std::string &key)
-        {
-            return mProps[key];
-        }
-
+        
+        //TODO Implement the function and put a link to the specification  in the comment below.
+        /**
+         * @brief Loads an object from a ".lua" file.
+         * 
+         * The file should contain the necessary properties and functions to
+         * create an instance the object, following this especifications.
+         * @param file Path to the .lua file.
+         * @param mgr This may be used to specify a different resource manager to
+         * take care of the contents created during the loading process.
+         */
         bool Load(const std::string& file, ResourceManager* mgr = NULL);
 
         void SetAnimationType(ore::uint8 animType)
@@ -199,8 +304,19 @@ namespace ore
         {
             return mSprite;
         }
-
-//       private:
+        
+        /**
+         * @brief Loads the sprite image from an image file.
+         * 
+         * Note that if you want to do a reload you should use the Reload() function.
+         */
+        bool LoadSprite(const std::string& path);
+        
+        bool LoadSprite(const void* data, size_t size)
+        {
+            return mImage->GetTexture().loadFromMemory(data, size);
+        }
+      private:
 
         /**
          * @brief Layer at which this object should be drawn.
@@ -228,13 +344,13 @@ namespace ore
         ore::Image *mImage;
 
         /**
-         * @brief Rady to draw sprite of the object image, also stores the
+         * @brief A "ready to draw" sprite of the object image, also stores the
          * object's position
          */
         sf::Sprite mSprite;
 
         /**
-         * @brief Used to crop the sprite image;
+         * @brief Used to crop the sprite image, and animate.
          */
         sf::IntRect mCrop;
 
@@ -246,8 +362,7 @@ namespace ore
         /**
          * @brief Properties of this object.
          */
-        std::map<const std::string, boost::variant<int, float, std::string,
-                                             std::vector<ore::uint8> > > mProps;
+        std::map< const std::string, Property > mProps;
 
         /**
          * @brief Loacal resource manager.

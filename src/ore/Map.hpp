@@ -36,7 +36,7 @@ namespace ore
         }
 
         /**
-         * @brief This function loads a map from a .tmx file.
+         * @brief Loads a map from a .tmx file.
          */
         void Load(const std::string &file);   
 
@@ -76,7 +76,8 @@ namespace ore
         }
 
         /**
-         * @brief This function adds a new layer to the map.
+         * @brief Adds a new layer to the map.
+         * 
          * By default it goes on top of the others, but this can be changed by
          * setting the pos value. Note that layers are always registerd on the
          * local resource manager.
@@ -90,7 +91,8 @@ namespace ore
         ore::Layer* AddLayer(const std::string &data, const std::string &name, int pos = -1);
 
         /**
-         * @brief This function adds a layer to the map.
+         * @brief Adds a layer to the map.
+         * 
          * By default it goes on top of the others, but this can be changed by
          * setting the pos value. Note that layers are always registerd on the
          * local resource manager.

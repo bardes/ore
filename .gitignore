@@ -3,6 +3,7 @@
 *~
 *.save
 *.bak
+*.kate-swp
 
 #IDE files
 *.kdev4

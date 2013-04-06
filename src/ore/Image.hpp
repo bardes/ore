@@ -14,10 +14,11 @@ namespace ore
     {
     public:
         Image();
+        virtual ~Image();
 
-        virtual ore::RESOURCE_TYPE GetType() const
+        virtual RESOURCE_TYPE GetType() const
         {
-            return ore::IMAGE_TYPE;
+            return IMAGE_TYPE;
         }
 
         sf::Texture& GetTexture()

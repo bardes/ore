@@ -21,6 +21,7 @@ namespace ore
          * Default constructor.
          */
         Tileset();
+        virtual ~Tileset();
 
         /**
          * @brief Gets the type of the resource;
@@ -31,21 +32,20 @@ namespace ore
         }
 
         /**
-         * This function loads the tileset from a source image. If it fails to
-         * load the image the tileset is left cleard.
+         * @brief Loads the tileset from a source image.
          * @param path relative or absolute path to the image file.
          * @param fGid the first gid of this tileset.
          * @param tileWidth width of the tiles in pixels.
          * @param tileHeight height of the tiles in pixels.
          * @param mgr Resource manager to keep track of the tileset image.
-         * @return Returns true if failed to load.
+         * @return false if failed to load.
          */
         bool Load(const std::string &path, ore::uint16 fGid, ore::uint8 tileWidth,
                   ore::uint8 tileHeight, ore::ResourceManager *mgr = NULL);
 
         /**
          * This function reloads the tileset, leaving it unchanged in case of failure.
-         * @return Returns true if it fails to load the image.
+         * @return Returns false if it fails to load the image.
          */
         bool Reload();
 

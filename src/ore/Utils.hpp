@@ -18,6 +18,8 @@ namespace ore
     typedef u_int16_t uint16;
     typedef u_int32_t uint32;
     typedef u_int64_t uint64;
+    
+//     typedef boost::variant<int, float, std::string, std::vector< ore::uint8 > > property;
 
     //Enums
     /**
@@ -29,10 +31,12 @@ namespace ore
         INDEX_OUT_OF_RANGE,
         INVALID_COMPRESSION_METHOD,
         INVALID_MAP_DATA,
+        INVALID_PROP_CONVERSION,
         INVALID_TILESET,
         IMAGE_READ_ERROR,
         NO_PATH,
         MAP_READ_ERROR,
+        PROP_NOT_FOUND,
         TILESET_COLLISION,
         ZLIB_ERROR
     };
@@ -55,6 +59,7 @@ namespace ore
         FLOAT_PROP,
         STRING_PROP,
         RAW_DATA_PROP,
+        NEW_PROP,
         UNKNOWN_PROP
     };
 
@@ -70,13 +75,39 @@ namespace ore
     struct Property
     {
         PROP_TYPE type;
-        union data
+        
+        union
         {
-            float f;
             int i;
-            std::string str;
-            std::vector<ore::uint8> raw;
+            float f;
+            std::string* str;
+            std::vector< ore::uint8 >* raw;
         };
+        
+        Property() : type(NEW_PROP)
+        {
+            i = 0;
+            f = 0;
+            str = 0;
+            raw = 0;
+            
+        }
+        Property(int n) : type(INT_PROP), i(n)
+        {
+            //Yay!
+        }
+        Property(float n) : type(FLOAT_PROP), f(n)
+        {
+            //Yay!
+        }
+        Property(const std::string& s) : type(STRING_PROP)
+        {
+            str = new std::string(s);
+        }
+        Property(const std::vector< ore::uint8 >& r) : type(RAW_DATA_PROP)
+        {
+            raw = new std::vector< ore::uint8 >(r);
+        }
     };
 
     //TODO Colocar num arquivo separado
