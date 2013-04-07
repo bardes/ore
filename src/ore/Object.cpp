@@ -1,7 +1,8 @@
 #include "Object.hpp"
 
 ore::Object::Object() : mLayer(0), mSize(0, 0), mCollisionBox(0, 0, 0, 0),
-    mOrigin(0, 0), mCrop(0, 0, 0, 0), mOrientation(ore::NORTH)
+     mImage(NULL), mAnimLength(1), mAnimSpeedFac(5), mCurrentFrame(0), mSubFrame(0),
+     mCrop(0, 0, 0, 0), mOrientation(ore::NORTH)
 {
 }
 
@@ -70,14 +71,14 @@ void ore::Object::DeleteProp(const std::string& key)
     if((i = mProps.find(key)) == mProps.end())
         return;
 
-    //Cleaning up any memory being used by the prop...
-    switch(i->second.type)
-    {
-        case STRING_PROP: delete i->second.str; break;
-        case RAW_DATA_PROP: delete i->second.raw; break;
-        case UNKNOWN_PROP: break; //TODO print a warning.
-        default: break;
-    }
+//     //Cleaning up any memory being used by the prop...
+//     switch(i->second.type)
+//     {
+//         case STRING_PROP: delete i->second.str; break;
+//         case RAW_DATA_PROP: delete i->second.raw; break;
+//         case UNKNOWN_PROP: break; //TODO print a warning.
+//         default: break;
+//     }
     
     mProps.erase(i); //Bye bye :)
 }
@@ -131,21 +132,38 @@ float& ore::Object::GetPropFloat(const std::string& key)
 std::string& ore::Object::GetPropStr(const std::string& key)
 {
     Property &p = GetProp(key);
-    if(p.type != STRING_PROP)
-        throw ore::PROP_NOT_FOUND;
     
-    return *(p.str);
+    if(p.type == STRING_PROP)
+    {
+        return *(p.str);
+    }
+    else if(p.type == NEW_PROP)
+    {
+        p.type = STRING_PROP;
+        p.str = new std::string;
+        return *(p.str);
+    }
+    
+    throw ore::PROP_NOT_FOUND;
 }
 
 std::vector< ore::uint8 >& ore::Object::GetPropRawData(const std::string& key)
 {
     Property &p = GetProp(key);
-    if(p.type != RAW_DATA_PROP)
-        throw INVALID_PROP_CONVERSION;
     
-    return *(p.raw);
+    if(p.type == RAW_DATA_PROP)
+    {
+        return *(p.raw);
+    }
+    else if(p.type == NEW_PROP)
+    {
+        p.type = RAW_DATA_PROP;
+        p.raw = new std::vector< ore::uint8 >;
+        return *(p.raw);
+    }
+    
+    throw INVALID_PROP_CONVERSION;
 }
-
 void ore::Object::RestartAnimation()
 {
     mCrop.left = 0;
@@ -155,37 +173,50 @@ void ore::Object::RestartAnimation()
 
 void ore::Object::UpdateAnimation(ore::uint8 frames)
 {
-    mCrop.left += frames * mSize.x;
-    if(mCrop.left >= mImage->GetTexture().getSize().x)
-        mCrop.left = 0;
+    if(!mAnimLength)
+        return;
+    
+    //This is nasty, I know.... But it make sense I swear.
+    mSubFrame += frames % mAnimSpeedFac;
+    mCurrentFrame += mSubFrame / mAnimSpeedFac;
+    mSubFrame %= mAnimSpeedFac;
+    mCurrentFrame += frames / mAnimSpeedFac;
+    mCurrentFrame %= mAnimLength;
+    mCrop.left = mCurrentFrame * mSize.x;
     mSprite.setTextureRect(mCrop);
 }
 
 bool ore::Object::LoadSprite(const std::string &path)
 {
+    //Cleaning any old data.
     if(mImage)
         mImage->DeleteUser(this);
     
+    //Checking if it isn't already on the resource manager
     Image* loaded;
     loaded = (ore::Image*)mLocalMgr.GetResource(path);
-    
     if(loaded)
     {
         mImage = loaded;
-        mImage->AddUser(this);
-        return true;
+    }
+    else //If it's not a new one is created
+    {    
+        mImage = new ore::Image;
+
+        if(!mImage->GetTexture().loadFromFile(path))
+        {
+            delete mImage;
+            mImage = NULL;
+            return false;
+        }
+        mLocalMgr.Register(mImage);
     }
     
-    mImage = new ore::Image;
-    
-    if(!mImage->GetTexture().loadFromFile(path))
-    {
-        delete mImage;
-        mImage = NULL;
-        return false;
-    }
-    
-    mLocalMgr.Register(mImage);
+    //Doing the book keeping...
     mImage->AddUser(this);
+    mSprite.setTexture(mImage->GetTexture());
+    mSprite.setTextureRect(mCrop);
+    if(mSize.x)
+        mAnimLength = mImage->GetTexture().getSize().x / mSize.x;
     return true;
 }

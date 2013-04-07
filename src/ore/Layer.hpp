@@ -20,7 +20,7 @@ namespace ore
 
         Layer(ore::uint8 w, ore::uint8 h, uint8 tw, uint8 th, const std::string &name);
 
-        virtual ore::RESOURCE_TYPE GetType() const
+        virtual ore::ResourceType GetType() const
         {
             return ore::LAYER_TYPE;
         }

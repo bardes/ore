@@ -16,7 +16,7 @@ namespace ore
         Image();
         virtual ~Image();
 
-        virtual RESOURCE_TYPE GetType() const
+        virtual ResourceType GetType() const
         {
             return IMAGE_TYPE;
         }

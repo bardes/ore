@@ -15,7 +15,7 @@ namespace ore
         /**
          * @brief When implemented should return the type of the resource.
          */
-        virtual RESOURCE_TYPE GetType() const = 0;
+        virtual ResourceType GetType() const = 0;
 
         /**
          * @brief Adds a new user.

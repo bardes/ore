@@ -4,7 +4,7 @@
 #include <string>
 #include <vector>
 
-void ore::base64decode(const std::string &encodedString,
+void ore::DecodeBase64(const std::string &encodedString,
                   std::vector<ore::uint8> &decodedData)
 {
     //Making sure decodedData is empty before we start...

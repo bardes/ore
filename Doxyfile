@@ -52,7 +52,7 @@ PROJECT_LOGO           =
 # If a relative path is entered, it will be relative to the location 
 # where doxygen was started. If left blank the current directory will be used.
 
-OUTPUT_DIRECTORY       = /arquivos/Projects/ore/doc
+OUTPUT_DIRECTORY       = ./doc
 
 # If the CREATE_SUBDIRS tag is set to YES, then doxygen will create 
 # 4096 sub-directories (in 2 levels) under the output directory of each output 
@@ -380,7 +380,7 @@ EXTRACT_ALL            = YES
 # If the EXTRACT_PRIVATE tag is set to YES all private members of a class 
 # will be included in the documentation.
 
-EXTRACT_PRIVATE        = NO
+EXTRACT_PRIVATE        = YES
 
 # If the EXTRACT_PACKAGE tag is set to YES all members with package or internal 
 # scope will be included in the documentation.
@@ -390,7 +390,7 @@ EXTRACT_PACKAGE        = NO
 # If the EXTRACT_STATIC tag is set to YES all static members of a file 
 # will be included in the documentation.
 
-EXTRACT_STATIC         = NO
+EXTRACT_STATIC         = YES
 
 # If the EXTRACT_LOCAL_CLASSES tag is set to YES classes (and structs) 
 # defined locally in source files will be included in the documentation. 
@@ -677,7 +677,7 @@ WARN_LOGFILE           =
 # directories like "/usr/src/myproject". Separate the files or directories 
 # with spaces.
 
-INPUT                  = /arquivos/Projects/ore/src/ore
+INPUT                  = src/ore
 
 # This tag can be used to specify the character encoding of the source files 
 # that doxygen parses. Internally doxygen uses the UTF-8 encoding, which is 
@@ -986,13 +986,13 @@ HTML_EXTRA_FILES       =
 # 180 is cyan, 240 is blue, 300 purple, and 360 is red again. 
 # The allowed range is 0 to 359.
 
-HTML_COLORSTYLE_HUE    = 220
+HTML_COLORSTYLE_HUE    = 95
 
 # The HTML_COLORSTYLE_SAT tag controls the purity (or saturation) of 
 # the colors in the HTML output. For a value of 0 the output will use 
 # grayscales only. A value of 255 will produce the most vivid colors.
 
-HTML_COLORSTYLE_SAT    = 100
+HTML_COLORSTYLE_SAT    = 85
 
 # The HTML_COLORSTYLE_GAMMA tag controls the gamma correction applied to 
 # the luminance component of the colors in the HTML output. Values below 
@@ -1001,7 +1001,7 @@ HTML_COLORSTYLE_SAT    = 100
 # so 80 represents a gamma of 0.8, The value 220 represents a gamma of 2.2, 
 # and 100 does not change the gamma.
 
-HTML_COLORSTYLE_GAMMA  = 80
+HTML_COLORSTYLE_GAMMA  = 70
 
 # If the HTML_TIMESTAMP tag is set to YES then the footer of each generated HTML 
 # page will contain the date and time when the page was generated. Setting 

@@ -26,7 +26,7 @@ namespace ore
         /**
          * @brief Gets the type of the resource;
          */
-        virtual ore::RESOURCE_TYPE GetType() const
+        virtual ore::ResourceType GetType() const
         {
             return ore::TILESET_TYPE;
         }

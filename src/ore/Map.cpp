@@ -259,7 +259,7 @@ ore::Tileset* ore::Map::AddTileset(const std::string &path, ore::uint16 fGid,
         loaded = new ore::Tileset;
         loaded->Load(path, fGid, tw, th);
     }
-    catch(ore::EXCEPTION exc)
+    catch(ore::Exception exc)
     {
         delete loaded;
         throw exc;
@@ -304,7 +304,7 @@ ore::Layer* ore::Map::AddLayer(const std::string &data, const std::string &name,
 
     //Decoding the base64 string
     std::vector<ore::uint8> decoded;
-    base64decode(data, decoded);
+    DecodeBase64(data, decoded);
 
     if(decoded.empty())
     {

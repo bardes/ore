@@ -25,7 +25,7 @@ namespace ore
     /**
      * Values to be thrown during exceptions.
      */
-    enum EXCEPTION
+    enum Exception
     {
         BAD_ALLOC,
         INDEX_OUT_OF_RANGE,
@@ -44,7 +44,7 @@ namespace ore
     /**
      * Resource types available.
      */
-    enum RESOURCE_TYPE
+    enum ResourceType
     {
         MAP_TYPE,
         TILESET_TYPE,
@@ -53,7 +53,10 @@ namespace ore
         OBJECT_TYPE
     };
 
-    enum PROP_TYPE
+    /**
+     * Prop types used to perform type checking when necessary.
+     */
+    enum PropType
     {
         INT_PROP,
         FLOAT_PROP,
@@ -63,7 +66,10 @@ namespace ore
         UNKNOWN_PROP
     };
 
-    enum ORIENTATION
+    /**
+     * Possible orientation values.
+     */
+    enum Orientation
     {
         NORTH = 0x000001,
         EAST =  0x000002,
@@ -72,10 +78,22 @@ namespace ore
     };
 
     //Structs
+    
+    /**
+     * This struct is a way to store different kinds of information using the
+     * same object.
+     */
     struct Property
     {
-        PROP_TYPE type;
+        /**
+         * Type of the value stored in this prop.
+         */
+        PropType type;
         
+        /**
+         * Here is where the magic happens and the value is stored in a different 
+         * variable according to it's type.
+         */
         union
         {
             int i;
@@ -92,22 +110,35 @@ namespace ore
             raw = 0;
             
         }
+        
         Property(int n) : type(INT_PROP), i(n)
         {
             //Yay!
         }
+        
         Property(float n) : type(FLOAT_PROP), f(n)
         {
             //Yay!
         }
+        
         Property(const std::string& s) : type(STRING_PROP)
         {
             str = new std::string(s);
         }
+        
         Property(const std::vector< ore::uint8 >& r) : type(RAW_DATA_PROP)
         {
             raw = new std::vector< ore::uint8 >(r);
         }
+        
+        ~Property()
+        {
+            if(type == STRING_PROP)
+                delete str;
+            else if(type == RAW_DATA_PROP)
+                delete raw;
+        }
+        
     };
 
     //TODO Colocar num arquivo separado
