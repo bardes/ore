@@ -141,7 +141,7 @@ namespace ore
         
     };
 
-    //TODO Colocar num arquivo separado
+    //TODO Put these in a separate file...
     //TODO Compress()
     int Uncompress(const std::vector<ore::uint8>& data, std::vector<ore::uint8>& result,
                    ore::uint32 expectedSize);

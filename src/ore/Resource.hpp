@@ -11,7 +11,7 @@ namespace ore
     {
     public:
         virtual ~Resource();
-        //TODO Implement a "flexible" local resmgr here.
+        //TODO Implement a "flexible" local resmgr here, not in every derived class.
         /**
          * @brief When implemented should return the type of the resource.
          */

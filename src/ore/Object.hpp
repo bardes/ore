@@ -12,13 +12,12 @@
 
 #include <SFML/Graphics.hpp>
 
-//TODO change all functions thar return false on success to true;
+//TODO change all functions that return false on success to true;
 namespace ore
 {
     class Object : public Resource
     {
     public:
-        //TODO Use float precision movement
         Object();
         virtual ~Object();
 
@@ -180,7 +179,7 @@ namespace ore
          * Note: this is only used for drawing the object. Collision detection is
          * performed using a collision box.
          */
-        void SetWidth(ore::uint32 w)
+        void SetWidth(float w)
         {
             mSize.x = mCrop.width = w;
         }
@@ -191,7 +190,7 @@ namespace ore
          * Note: this is only used for drawing the object. Collision detection is
          * performed using a collision box.
          */
-        void SetHeight(ore::uint32 h)
+        void SetHeight(float h)
         {
             mSize.y = mCrop.height = h;
         }
@@ -203,7 +202,7 @@ namespace ore
          * Note: this is only used for drawing the object. Collision detection is
          * performed using a collision box.
          */
-        void SetSize(ore::uint32 w, ore::uint32 h)
+        void SetSize(float w, float h)
         {
             mSize.x = mCrop.width = w;
             mSize.y = mCrop.height = h;
@@ -216,7 +215,7 @@ namespace ore
          * Note: this is only used for drawing the object. Collision detection is
          * performed using a collision box.
          */
-        void SetSize(sf::Vector2i size)
+        void SetSize(sf::Vector2f size)
         {
             mSize = size;
             mCrop.width = size.x;
@@ -226,7 +225,7 @@ namespace ore
         /**
          * @brief Gets the width of the object.
          */
-        ore::uint32 GetWidth() const
+        float GetWidth() const
         {
             return mSize.x;
         }
@@ -234,7 +233,7 @@ namespace ore
         /**
          * @brief Gets the height of the object.
          */
-        ore::uint32 GetHeight() const
+        float GetHeight() const
         {
             return mSize.y;
         }
@@ -242,7 +241,7 @@ namespace ore
         /**
          * @brief Gets the size of the object.
          */
-        sf::Vector2i GetSize() const
+        sf::Vector2f GetSize() const
         {
             return mSize;
         }
@@ -251,9 +250,9 @@ namespace ore
          * @brief Moves the object.
          * @param delta How much to move the object.
          */
-        void Move(sf::Vector2i delta)
+        void Move(const sf::Vector2f& delta)
         {
-            mSprite.move(delta.x, delta.y);
+            mSprite.move(delta);
         }
 
         /**
@@ -295,7 +294,7 @@ namespace ore
          * 
          * Coordinates are relative to the object and measured in pixels.
          */
-        void SetCollisionBox(const sf::IntRect& box)
+        void SetCollisionBox(const sf::FloatRect& box)
         {
             mCollisionBox = box;
         }
@@ -304,7 +303,7 @@ namespace ore
          * @brief Gets a copy of the collision box.\n
          * Don't forget that the position returned is relative to the object!
          */
-        sf::IntRect GetCollisionBox() const
+        sf::FloatRect GetCollisionBox() const
         {
             return mCollisionBox;
         }
@@ -315,7 +314,7 @@ namespace ore
          * This is the point used to calculate distances, angles, rotations etc...
          * \n Don't forget that the coordinates are relative to the object.
          */
-        void SetOrigin(ore::uint32 x, ore::uint32 y)
+        void SetOrigin(float x, float y)
         {
             mSprite.setOrigin(x, y);
         }
@@ -360,18 +359,37 @@ namespace ore
          * 
          * This does _NOT_ change the animation type.
          */
-        void RestartAnimation();
+        void ResetAnimation();
 
         /**
          * @brief Updates the animation of this object.
-         * @param frames Number of frames you want to advance.
          * 
          * You probably won't need to call this with any argument, unless you
          * have frame dropping.\n
          * Note that if the sprite of the object is not set up properly this won't
          * work.
+         * @param frames Number of frames you want to advance.
          */
         void UpdateAnimation(ore::uint8 frames = 1);
+        
+        /**
+         * @brief Sets how many times slower the animation will run.
+         * 
+         * Setting this to 0 will result in a non animated object.
+         */
+        void SetAnimSpeedFac(ore::uint8 s)
+        {
+            mAnimSpeedFac = s;
+        }
+        
+        /**
+         * @brief Sets the lenght of the animation of this object.
+         * 
+         * This is the number of actual frames, __without__ accounting for sub frames...\n
+         * __ATENTION__: The size of the object must be set before this function
+         * call, otherwise nothing will happen.
+         */
+        void SetAnimLength(ore::uint8 l);
 
         /**
          * @brief Gets a "ready to draw" sprite image of the object.
@@ -388,19 +406,24 @@ namespace ore
         /**
          * @brief Loads the sprite image from an image file.
          * 
-         * Note that if you want to do a reload you should use the Reload() function.
+         * This function will attempt to set the animation length based on the
+         * object size and the image size. If mSize is not set mAnimLength will
+         * become 0.\n
+         * Note that if you want to do a reload you should use the Reload() function
+         * since this won't actually reload the file if it's found in the resMgr.
          */
         bool LoadSprite(const std::string& path);
         
         /**
          * @brief Loads a sprite image directly from memory.
+         * 
+         * This function will attempt to set the animation length based on the
+         * object size and the image size. If mSize is not set mAnimLength will
+         * become 0.
          * @param data This should be an array of pixels using the RGBA format.
          * @param size Size of the array. (in bytes)
          */
-        bool LoadSprite(const void* data, size_t size)
-        {
-            return mImage->GetTexture().loadFromMemory(data, size);
-        }
+        bool LoadSprite(const void* data, size_t size);
         
       private:
 
@@ -412,12 +435,12 @@ namespace ore
         /**
          * @brief Size of the object. (in pixels)
          */
-        sf::Vector2i mSize;
+        sf::Vector2f mSize;
 
         /**
          * @brief Area considered solid during collisions
          */
-        sf::IntRect mCollisionBox;
+        sf::FloatRect mCollisionBox;
 
         /**
          * @brief Sprite image of the object.

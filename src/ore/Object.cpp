@@ -1,7 +1,7 @@
 #include "Object.hpp"
 
 ore::Object::Object() : mLayer(0), mSize(0, 0), mCollisionBox(0, 0, 0, 0),
-     mImage(NULL), mAnimLength(1), mAnimSpeedFac(5), mCurrentFrame(0), mSubFrame(0),
+     mImage(NULL), mAnimLength(0), mAnimSpeedFac(1), mCurrentFrame(0), mSubFrame(0),
      mCrop(0, 0, 0, 0), mOrientation(ore::NORTH)
 {
 }
@@ -70,15 +70,6 @@ void ore::Object::DeleteProp(const std::string& key)
     std::map< const std::string, Property >::iterator i;
     if((i = mProps.find(key)) == mProps.end())
         return;
-
-//     //Cleaning up any memory being used by the prop...
-//     switch(i->second.type)
-//     {
-//         case STRING_PROP: delete i->second.str; break;
-//         case RAW_DATA_PROP: delete i->second.raw; break;
-//         case UNKNOWN_PROP: break; //TODO print a warning.
-//         default: break;
-//     }
     
     mProps.erase(i); //Bye bye :)
 }
@@ -164,24 +155,44 @@ std::vector< ore::uint8 >& ore::Object::GetPropRawData(const std::string& key)
     
     throw INVALID_PROP_CONVERSION;
 }
-void ore::Object::RestartAnimation()
+void ore::Object::ResetAnimation()
 {
+    if(mSize.x)
+        mAnimLength = mImage->GetTexture().getSize().x / mSize.x;
+    
+    mCurrentFrame = mSubFrame = 0;
     mCrop.left = 0;
     mSprite.setTextureRect(mCrop);
     mSprite.setTexture(mImage->GetTexture());
 }
 
+void ore::Object::SetAnimLength(ore::uint8 l)
+{
+    if(mImage && mSize.x)
+    {
+        if(l > mImage->GetTexture().getSize().x * mSize.x)
+            mAnimLength = mImage->GetTexture().getSize().x / mSize.x;
+        else
+            mAnimLength = l;
+    }
+}
+
 void ore::Object::UpdateAnimation(ore::uint8 frames)
 {
-    if(!mAnimLength)
+    if(!mAnimLength || !mAnimSpeedFac)
         return;
     
     //This is nasty, I know.... But it make sense I swear.
     mSubFrame += frames % mAnimSpeedFac;
-    mCurrentFrame += mSubFrame / mAnimSpeedFac;
-    mSubFrame %= mAnimSpeedFac;
+    if(mSubFrame >= mAnimSpeedFac)
+    {
+        mCurrentFrame++;
+        mSubFrame %= mAnimSpeedFac;        
+    }
+    
     mCurrentFrame += frames / mAnimSpeedFac;
     mCurrentFrame %= mAnimLength;
+    
     mCrop.left = mCurrentFrame * mSize.x;
     mSprite.setTextureRect(mCrop);
 }
@@ -218,5 +229,33 @@ bool ore::Object::LoadSprite(const std::string &path)
     mSprite.setTextureRect(mCrop);
     if(mSize.x)
         mAnimLength = mImage->GetTexture().getSize().x / mSize.x;
+    else
+        mAnimLength = 0;
+    return true;
+}
+
+bool ore::Object::LoadSprite(const void* data, size_t size)
+{
+    //Cleaning any old data...
+    if(mImage)
+        mImage->DeleteUser(this);
+    
+    mImage = new Image;
+    
+    if(!mImage->GetTexture().loadFromMemory(data, size))
+    {    
+        delete mImage;
+        mImage = NULL;
+        return false;
+    }
+    
+    mLocalMgr.Register(mImage);
+    mImage->AddUser(this);
+    mSprite.setTexture(mImage->GetTexture());
+    mSprite.setTextureRect(mCrop);
+    if(mSize.x)
+        mAnimLength = mImage->GetTexture().getSize().x / mSize.x;
+    else
+        mAnimLength = 0;
     return true;
 }

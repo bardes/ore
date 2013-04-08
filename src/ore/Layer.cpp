@@ -21,7 +21,9 @@ sf::Sprite ore::Layer::RenderCache(const std::vector<Tileset*>& tilesets)
     mCache.clear(sf::Color(0, 0, 0, 0));
     //mCache.setSmooth(false);
     for(int y = 0; y < mHeight; ++y)
+    {
         for(int x = 0; x < mWidth; ++x)
+        {
             for(int t = 0; t < tilesets.size(); ++t)
             {
                 if(tilesets[t]->IsMyGid(GetGid(x, y)))
@@ -33,6 +35,9 @@ sf::Sprite ore::Layer::RenderCache(const std::vector<Tileset*>& tilesets)
                     break;
                 }
             }
+        }
+    }
+    
     mCache.display();
     return sf::Sprite(mCache.getTexture());
 }
