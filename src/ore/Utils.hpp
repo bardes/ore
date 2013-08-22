@@ -94,6 +94,7 @@ namespace ore
          * Here is where the magic happens and the value is stored in a different 
          * variable according to it's type.
          */
+        //TODO Make str and raw "non pointers"
         union
         {
             int i;

@@ -157,13 +157,15 @@ std::vector< ore::uint8 >& ore::Object::GetPropRawData(const std::string& key)
 }
 void ore::Object::ResetAnimation()
 {
-    if(mSize.x)
+    if(mSize.x && mImage)
+    {
         mAnimLength = mImage->GetTexture().getSize().x / mSize.x;
+        mSprite.setTexture(mImage->GetTexture());
+    }
     
     mCurrentFrame = mSubFrame = 0;
     mCrop.left = 0;
     mSprite.setTextureRect(mCrop);
-    mSprite.setTexture(mImage->GetTexture());
 }
 
 void ore::Object::SetAnimLength(ore::uint8 l)
@@ -209,9 +211,10 @@ bool ore::Object::LoadSprite(const std::string &path)
     if(loaded)
     {
         mImage = loaded;
+        return true;
     }
     else //If it's not a new one is created
-    {    
+    {
         mImage = new ore::Image;
 
         if(!mImage->GetTexture().loadFromFile(path))
@@ -227,10 +230,12 @@ bool ore::Object::LoadSprite(const std::string &path)
     mImage->AddUser(this);
     mSprite.setTexture(mImage->GetTexture());
     mSprite.setTextureRect(mCrop);
+
     if(mSize.x)
         mAnimLength = mImage->GetTexture().getSize().x / mSize.x;
     else
         mAnimLength = 0;
+    
     return true;
 }
 
@@ -240,7 +245,7 @@ bool ore::Object::LoadSprite(const void* data, size_t size)
     if(mImage)
         mImage->DeleteUser(this);
     
-    mImage = new Image;
+    mImage = new ore::Image;
     
     if(!mImage->GetTexture().loadFromMemory(data, size))
     {    
@@ -253,9 +258,11 @@ bool ore::Object::LoadSprite(const void* data, size_t size)
     mImage->AddUser(this);
     mSprite.setTexture(mImage->GetTexture());
     mSprite.setTextureRect(mCrop);
+
     if(mSize.x)
         mAnimLength = mImage->GetTexture().getSize().x / mSize.x;
     else
         mAnimLength = 0;
+
     return true;
 }

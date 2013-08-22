@@ -1,8 +1,5 @@
--Use exceptions to report errors
---Update the map Load() function
---Update the tileset Load() function
---Update the rest
---Update ore::RETURN_VALUE
-
--Use python to handle the ui and the NPCs logic
-
+Update the readme (use markdown)
+Implement basic lua support
+Test performance and memory usage
+Implement GUI and menus
+Write decent CMakeLists.txt files

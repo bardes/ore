@@ -11,6 +11,6 @@ ore::Image::Image() : mTexture()
 
 ore::Image::~Image()
 {
-
+    //Yay!
 }
 
